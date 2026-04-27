@@ -441,7 +441,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
      JAVASCRIPT
 ════════════════════════════════════════════════════════════ -->
 <script>
-// ─── 상수 ────────────────────────────────────────────────────────────────────
+// --- 상수 --------------------------------------------------------------------
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink';
@@ -455,14 +455,14 @@ const TYPE_COLORS = {
 function fileIcon(name) {
   const ext = (name.split('.').pop() || '').toLowerCase();
   const map = {
-    pdf:'📕', doc:'📘', docx:'📘', xls:'📗', xlsx:'📗', ppt:'📙', pptx:'📙',
-    hwp:'📓', hwpx:'📓', jpg:'🖼', jpeg:'🖼', png:'🖼', gif:'🖼', webp:'🖼',
-    svg:'🖼', bmp:'🖼', tiff:'🖼', mp4:'🎬', mov:'🎬', avi:'🎬', mkv:'🎬',
-    mp3:'🎵', wav:'🎵', aac:'🎵', flac:'🎵', zip:'📦', rar:'📦', '7z':'📦',
-    txt:'📄', md:'📄', csv:'📊', json:'📊', xml:'📊',
-    dwg:'📐', dxf:'📐', rvt:'📐', ifc:'📐', psd:'🎨', ai:'🎨',
+    pdf:'pdf', doc:'doc', docx:'doc', xls:'xls', xlsx:'xls', ppt:'ppt', pptx:'ppt',
+    hwp:'hwp', hwpx:'hwp', jpg:'img', jpeg:'img', png:'img', gif:'img', webp:'img',
+    svg:'img', bmp:'img', tiff:'img', mp4:'vid', mov:'vid', avi:'vid', mkv:'vid',
+    mp3:'aud', wav:'aud', aac:'aud', flac:'aud', zip:'zip', rar:'zip', '7z':'zip',
+    txt:'txt', md:'txt', csv:'dat', json:'dat', xml:'dat',
+    dwg:'cad', dxf:'cad', rvt:'cad', ifc:'cad', psd:'art', ai:'art',
   };
-  return map[ext] || '📎';
+  return map[ext] || 'fil';
 }
 function fmtSize(b) {
   if (b < 1024) return b + 'B';
@@ -470,7 +470,7 @@ function fmtSize(b) {
   return (b / 1048576).toFixed(1) + 'MB';
 }
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
+// --- STATE -------------------------------------------------------------------
 let selType = '공문';
 let attendees = [];
 let history = [];
@@ -478,7 +478,7 @@ let attachedFiles = [];
 let fileIdCounter = 0;
 let cfg = { clientId:'', clientSecret:'', folderId:'', refreshToken:'', accessToken:'', tokenExpiry:0, botToken:'', chatId:'' };
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// --- INIT --------------------------------------------------------------------
 function init() {
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
   document.getElementById('memo').addEventListener('input', function() {
@@ -490,7 +490,7 @@ function init() {
   checkOAuthCallback(); // URL에 code 파라미터 있으면 처리
 }
 
-// ─── CONFIG 저장/로드 ─────────────────────────────────────────────────────────
+// --- CONFIG 저장/로드 ---------------------------------------------------------
 function loadCfg() {
   try {
     const s = localStorage.getItem('sjs_cfg_v4');
@@ -520,12 +520,12 @@ function saveSetup() {
   document.getElementById('setupPanel').classList.remove('open');
 }
 
-// ─── BADGES & BANNER ─────────────────────────────────────────────────────────
+// --- BADGES & BANNER ---------------------------------------------------------
 function updateBadges() {
   const hasDrive = !!(cfg.refreshToken && cfg.folderId);
   const hasTg = !!(cfg.botToken && cfg.chatId);
   document.getElementById('dotDrive').className = 'dot ' + (hasDrive ? 'ok' : 'none');
-  document.getElementById('labelDrive').textContent = hasDrive ? 'Google Drive ✓ 자동갱신' : 'Google Drive';
+  document.getElementById('labelDrive').textContent = hasDrive ? 'Google Drive - 자동갱신' : 'Google Drive';
   document.getElementById('dotTg').className = 'dot ' + (hasTg ? 'ok' : 'none');
 }
 function updateAuthBanner() {
@@ -533,7 +533,7 @@ function updateAuthBanner() {
   const text = document.getElementById('authBannerText');
   if (cfg.refreshToken) {
     banner.className = 'auth-banner ok';
-    text.textContent = 'Google 계정 인증 완료 — Access Token이 만료되면 자동으로 갱신됩니다.';
+    text.textContent = 'Google 계정 인증 완료 - Access Token이 만료되면 자동으로 갱신됩니다.';
   } else if (cfg.clientId && cfg.clientSecret) {
     banner.className = 'auth-banner warn';
     text.textContent = 'Client ID / Secret이 입력됐습니다. 아래 [Google 계정으로 인증하기] 버튼을 눌러 인증을 완료하세요.';
@@ -543,7 +543,7 @@ function updateAuthBanner() {
   }
 }
 
-// ─── GOOGLE OAUTH 2.0 ────────────────────────────────────────────────────────
+// --- GOOGLE OAUTH 2.0 --------------------------------------------------------
 // 인증 시작: Google 로그인 페이지로 이동
 function startGoogleAuth() {
   const clientId = document.getElementById('cfgClientId').value.trim();
@@ -580,7 +580,7 @@ async function checkOAuthCallback() {
   // URL에서 code 제거 (새로고침 시 재처리 방지)
   window.history.replaceState({}, document.title, window.location.pathname);
 
-  addLog('info', '🔑', 'Google 인증 코드 수신 — Access Token 교환 중...');
+  addLog('info', '-', 'Google 인증 코드 수신 - Access Token 교환 중...');
   document.getElementById('setupPanel').classList.add('open');
 
   try {
@@ -604,13 +604,13 @@ async function checkOAuthCallback() {
       saveCfg();
       updateBadges();
       updateAuthBanner();
-      addLog('ok', '✓', 'Google Drive 인증 완료! 이제 Access Token이 자동으로 갱신됩니다.');
+      addLog('ok', '-', 'Google Drive 인증 완료! 이제 Access Token이 자동으로 갱신됩니다.');
       showToast('Google Drive 인증 성공!');
     } else {
-      addLog('err', '✗', '인증 실패: ' + (data.error_description || JSON.stringify(data)));
+      addLog('err', '-', '인증 실패: ' + (data.error_description || JSON.stringify(data)));
     }
   } catch(e) {
-    addLog('err', '✗', '인증 처리 오류: ' + e.message);
+    addLog('err', '-', '인증 처리 오류: ' + e.message);
   }
 }
 
@@ -622,7 +622,7 @@ async function getValidAccessToken() {
     return cfg.accessToken;
   }
   // 만료됐거나 없으면 Refresh Token으로 새 토큰 발급
-  addLog('info', '🔄', 'Access Token 자동 갱신 중...');
+  addLog('info', '-', 'Access Token 자동 갱신 중...');
   try {
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
@@ -639,14 +639,14 @@ async function getValidAccessToken() {
       cfg.accessToken = data.access_token;
       cfg.tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
       saveCfg();
-      addLog('ok', '✓', 'Access Token 자동 갱신 완료');
+      addLog('ok', '-', 'Access Token 자동 갱신 완료');
       return cfg.accessToken;
     } else {
-      addLog('err', '✗', '토큰 갱신 실패: ' + (data.error_description || JSON.stringify(data)));
+      addLog('err', '-', '토큰 갱신 실패: ' + (data.error_description || JSON.stringify(data)));
       return null;
     }
   } catch(e) {
-    addLog('err', '✗', '토큰 갱신 오류: ' + e.message);
+    addLog('err', '-', '토큰 갱신 오류: ' + e.message);
     return null;
   }
 }
@@ -662,50 +662,50 @@ function revokeGoogle() {
   showToast('Google 인증이 해제됐습니다');
 }
 
-// ─── SETUP GUIDES ─────────────────────────────────────────────────────────────
+// --- SETUP GUIDES -------------------------------------------------------------
 const GUIDES = {
-  clientid: `<b>🔑 Google Cloud Client ID / Secret 발급 방법 (최초 1회)</b><br><br>
+  clientid: `<b>- Google Cloud Client ID / Secret 발급 방법 (최초 1회)</b><br><br>
 <b>1단계: Google Cloud 프로젝트 생성</b><br>
-1. <a href="https://console.cloud.google.com" target="_blank" style="color:#1A9E74">console.cloud.google.com</a> 접속 → Google 계정 로그인<br>
-2. 상단 프로젝트 선택 → <b>[새 프로젝트]</b> → 이름 입력 (예: 상지서울문서관리) → 만들기<br><br>
+1. <a href="https://console.cloud.google.com" target="_blank" style="color:#1A9E74">console.cloud.google.com</a> 접속 - Google 계정 로그인<br>
+2. 상단 프로젝트 선택 - <b>[새 프로젝트]</b> - 이름 입력 (예: 상지서울문서관리) - 만들기<br><br>
 <b>2단계: Google Drive API 활성화</b><br>
-3. 좌측 메뉴 → <b>API 및 서비스</b> → <b>라이브러리</b><br>
-4. "Google Drive API" 검색 → 클릭 → <b>[사용 설정]</b><br><br>
+3. 좌측 메뉴 - <b>API 및 서비스</b> - <b>라이브러리</b><br>
+4. "Google Drive API" 검색 - 클릭 - <b>[사용 설정]</b><br><br>
 <b>3단계: OAuth 동의 화면 설정</b><br>
-5. 좌측 메뉴 → <b>OAuth 동의 화면</b> → 사용자 유형: <b>외부</b> 선택 → 만들기<br>
-6. 앱 이름 입력 (예: 상지서울) → 지원 이메일 선택 → <b>[저장 후 계속]</b><br>
-7. 범위 추가: <code>.../auth/drive.file</code> 추가 → 저장 후 계속<br>
-8. 테스트 사용자 추가: 사용할 Google 계정 이메일 입력 → 저장<br><br>
+5. 좌측 메뉴 - <b>OAuth 동의 화면</b> - 사용자 유형: <b>외부</b> 선택 - 만들기<br>
+6. 앱 이름 입력 (예: 상지서울) - 지원 이메일 선택 - <b>[저장 후 계속]</b><br>
+7. 범위 추가: <code>.../auth/drive.file</code> 추가 - 저장 후 계속<br>
+8. 테스트 사용자 추가: 사용할 Google 계정 이메일 입력 - 저장<br><br>
 <b>4단계: OAuth 2.0 Client ID 생성</b><br>
-9. 좌측 메뉴 → <b>사용자 인증 정보</b> → <b>[사용자 인증 정보 만들기]</b> → OAuth 클라이언트 ID<br>
+9. 좌측 메뉴 - <b>사용자 인증 정보</b> - <b>[사용자 인증 정보 만들기]</b> - OAuth 클라이언트 ID<br>
 10. 애플리케이션 유형: <b>웹 애플리케이션</b> 선택<br>
 11. <b>승인된 리디렉션 URI</b>에 이 파일의 주소 추가:<br>
 <code>file:///C:/Users/.../sjs_doc_logger_v4.html</code> (파일을 브라우저에서 열었을 때의 URL)<br>
-⚠ 로컬 파일인 경우 <code>http://localhost</code>를 추가하거나, 파일을 웹서버에 올리는 것을 권장<br>
-12. 만들기 → <b>클라이언트 ID</b>와 <b>클라이언트 보안 비밀번호</b> 복사 → 위 입력란에 붙여넣기`,
+- 로컬 파일인 경우 <code>http://localhost</code>를 추가하거나, 파일을 웹서버에 올리는 것을 권장<br>
+12. 만들기 - <b>클라이언트 ID</b>와 <b>클라이언트 보안 비밀번호</b> 복사 - 위 입력란에 붙여넣기`,
 
-  folder: `<b>📁 Google Drive 폴더 ID 확인 방법</b><br>
+  folder: `<b>- Google Drive 폴더 ID 확인 방법</b><br>
 1. Google Drive에서 저장할 폴더 열기<br>
 2. 브라우저 주소창 URL 확인:<br>
 <code>https://drive.google.com/drive/folders/<b>[여기가 폴더 ID]</b></code><br>
 3. <b>/folders/</b> 뒤의 문자열 전체 복사`,
 
-  bot: `<b>🤖 Telegram Bot Token 발급 방법</b><br>
-1. 텔레그램에서 <b>@BotFather</b> 검색 → 대화 시작<br>
+  bot: `<b>- Telegram Bot Token 발급 방법</b><br>
+1. 텔레그램에서 <b>@BotFather</b> 검색 - 대화 시작<br>
 2. <code>/newbot</code> 입력<br>
 3. 봇 이름 및 username 입력 (username은 반드시 bot으로 끝나야 함)<br>
 4. 발급된 <b>HTTP API Token</b> 복사<br>
 5. 만든 봇을 알림 받을 채널/그룹에 <b>관리자로 초대</b>`,
 
-  chat: `<b>💬 Telegram Chat ID 확인 방법</b><br>
-• 공개 채널: <code>@채널명</code> 형태로 입력 가능<br>
-• 비공개 채널/그룹 ID 확인:<br>
+  chat: `<b>- Telegram Chat ID 확인 방법</b><br>
+- 공개 채널: <code>@채널명</code> 형태로 입력 가능<br>
+- 비공개 채널/그룹 ID 확인:<br>
 1. 봇을 채널 관리자로 초대 후 채널에 메시지 발송<br>
 2. 브라우저에서 아래 URL 접속 (봇 토큰 교체):<br>
 <code>https://api.telegram.org/bot[봇토큰]/getUpdates</code><br>
-3. JSON에서 <b>"chat" → "id"</b> 값 확인<br>
-⚠ 비공개 채널 ID는 반드시 <b>-100으로 시작하는 숫자</b>여야 합니다.<br>
-마이너스(-)가 없다면 봇이 채널 관리자로 초대되지 않은 것 → 재초대 후 재시도`
+3. JSON에서 <b>"chat" - "id"</b> 값 확인<br>
+- 비공개 채널 ID는 반드시 <b>-100으로 시작하는 숫자</b>여야 합니다.<br>
+마이너스(-)가 없다면 봇이 채널 관리자로 초대되지 않은 것 - 재초대 후 재시도`
 };
 
 function showGuide(key) {
@@ -715,7 +715,7 @@ function showGuide(key) {
   } else { box.style.display = 'none'; }
 }
 
-// ─── DRAG & DROP ─────────────────────────────────────────────────────────────
+// --- DRAG & DROP -------------------------------------------------------------
 function setupDrop() {
   const zone = document.getElementById('dropZone');
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
@@ -726,7 +726,7 @@ function setupDrop() {
   });
 }
 
-// ─── FILE HANDLING ────────────────────────────────────────────────────────────
+// --- FILE HANDLING ------------------------------------------------------------
 function handleFileSelect(files) {
   if (!files || !files.length) return;
   Array.from(files).forEach(file => {
@@ -749,19 +749,19 @@ function renderFileList() {
     list.innerHTML = ''; summary.textContent = '첨부된 파일 없음'; clearBtn.style.display = 'none'; return;
   }
   const total = attachedFiles.reduce((s, f) => s + f.file.size, 0);
-  summary.textContent = `${attachedFiles.length}개 파일 · 총 ${fmtSize(total)}`;
+  summary.textContent = `${attachedFiles.length}개 파일 - 총 ${fmtSize(total)}`;
   clearBtn.style.display = 'inline-flex';
   list.innerHTML = attachedFiles.map(af => {
     const statusLabel = { pending:'대기', uploading:'업로드 중', done:'완료', error:'오류' }[af.status];
-    const linkHtml = af.driveLink ? `<a class="file-link" href="${af.driveLink}" target="_blank">🔗 Drive에서 열기</a>` : '';
+    const linkHtml = af.driveLink ? `<a class="file-link" href="${af.driveLink}" target="_blank">- Drive에서 열기</a>` : '';
     return `<div class="file-item" id="fi-${af.id}">
       <span class="file-icon">${fileIcon(af.file.name)}</span>
       <div class="file-info">
         <div class="file-name" title="${af.file.name}">${af.file.name}</div>
-        <div class="file-size">${fmtSize(af.file.size)} · ${af.file.type || '알 수 없는 형식'}${linkHtml}</div>
+        <div class="file-size">${fmtSize(af.file.size)} - ${af.file.type || '알 수 없는 형식'}${linkHtml}</div>
       </div>
       <span class="file-status ${af.status}">${statusLabel}</span>
-      <span class="file-del" onclick="removeFile(${af.id})" title="삭제">×</span>
+      <span class="file-del" onclick="removeFile(${af.id})" title="삭제">-</span>
     </div>`;
   }).join('');
 }
@@ -773,7 +773,7 @@ function updateFileStatus(id, status, driveLink = null) {
   renderFileList();
 }
 
-// ─── FORM ─────────────────────────────────────────────────────────────────────
+// --- FORM ---------------------------------------------------------------------
 function pickType(el) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('on'));
   el.classList.add('on'); selType = el.textContent;
@@ -787,7 +787,7 @@ function addAtt() {
 function removeAtt(name) { attendees = attendees.filter(a => a !== name); renderTags(); }
 function renderTags() {
   document.getElementById('attTags').innerHTML = attendees.map(a =>
-    `<div class="tag"><span>${a}</span><span class="tag-x" onclick="removeAtt('${a.replace(/'/g,"\\'")}')">×</span></div>`
+    `<div class="tag"><span>${a}</span><span class="tag-x" onclick="removeAtt('${a.replace(/'/g,"\\'")}')">-</span></div>`
   ).join('');
 }
 function v(id) { return document.getElementById(id).value.trim(); }
@@ -796,35 +796,35 @@ function autoNum() {
   document.getElementById('docnum').value = `SJS-${d}-${(history.length + 1).toString().padStart(3, '0')}`;
 }
 
-// ─── RECORD BUILDER ───────────────────────────────────────────────────────────
+// --- RECORD BUILDER -----------------------------------------------------------
 function buildRecord(fileLinks = []) {
   const date = v('date'), title = v('title'), project = v('project');
   if (!date || !title || !project) return null;
   const dir = v('direction'), docnum = v('docnum'), mgr = v('manager'),
         cp = v('counterpart'), memo = v('memo'), link = v('manualLink');
-  let t = '📄 수발신 문서 기록\n━━━━━━━━━━━━━━━━━━━\n';
-  t += `📅 날짜: ${date}\n🔄 구분: ${dir}\n🏗 프로젝트: ${project}\n`;
-  if (docnum) t += `🔢 문서번호: ${docnum}\n`;
-  t += `📋 제목: ${title}\n🗂 유형: ${selType}\n`;
-  if (mgr) t += `👤 담당자: ${mgr}\n`;
-  if (cp) t += `🏢 상대방/기관: ${cp}\n`;
-  if (attendees.length) t += `👥 참석자: ${attendees.join(', ')}\n`;
-  if (memo) t += `📝 주요 내용:\n${memo.split('\n').map(l => '   ' + l).join('\n')}\n`;
+  let t = '- 수발신 문서 기록\n-------------------\n';
+  t += `- 날짜: ${date}\n- 구분: ${dir}\n- 프로젝트: ${project}\n`;
+  if (docnum) t += `- 문서번호: ${docnum}\n`;
+  t += `- 제목: ${title}\n- 유형: ${selType}\n`;
+  if (mgr) t += `- 담당자: ${mgr}\n`;
+  if (cp) t += `- 상대방/기관: ${cp}\n`;
+  if (attendees.length) t += `- 참석자: ${attendees.join(', ')}\n`;
+  if (memo) t += `- 주요 내용:\n${memo.split('\n').map(l => '   ' + l).join('\n')}\n`;
   if (attachedFiles.length) {
-    t += `📎 첨부파일 (${attachedFiles.length}개):\n`;
+    t += `- 첨부파일 (${attachedFiles.length}개):\n`;
     attachedFiles.forEach((af, i) => {
       t += `   ${i + 1}. ${af.file.name} [${fmtSize(af.file.size)}]`;
       const lnk = fileLinks[i] || af.driveLink;
-      if (lnk) t += `\n      🔗 ${lnk}`;
+      if (lnk) t += `\n      - ${lnk}`;
       t += '\n';
     });
   }
-  if (link) t += `🔗 저장 위치: ${link}\n`;
-  t += `━━━━━━━━━━━━━━━━━━━\n⏰ 기록시각: ${new Date().toLocaleString('ko-KR')}`;
+  if (link) t += `- 저장 위치: ${link}\n`;
+  t += `-------------------\n- 기록시각: ${new Date().toLocaleString('ko-KR')}`;
   return t;
 }
 
-// ─── LOG / PROGRESS ───────────────────────────────────────────────────────────
+// --- LOG / PROGRESS -----------------------------------------------------------
 function setProgress(pct) {
   const bar = document.getElementById('progressBar');
   const fill = document.getElementById('progressFill');
@@ -846,7 +846,7 @@ function clearLog() {
   setProgress(0);
 }
 
-// ─── DRIVE UPLOAD ────────────────────────────────────────────────────────────
+// --- DRIVE UPLOAD ------------------------------------------------------------
 async function driveUpload(name, blobOrFile, mimeType = 'text/plain') {
   const token = await getValidAccessToken();
   if (!token || !cfg.folderId) return null;
@@ -869,13 +869,13 @@ async function driveUpload(name, blobOrFile, mimeType = 'text/plain') {
 
 async function uploadTextToDrive(filename, content) {
   if (!cfg.refreshToken || !cfg.folderId) return null;
-  addLog('info', '⬆', '기록 텍스트 Drive 업로드 중...');
+  addLog('info', '-', '기록 텍스트 Drive 업로드 중...');
   try {
     const link = await driveUpload(filename, content, 'text/plain;charset=utf-8');
-    addLog('ok', '✓', '기록 텍스트 업로드 완료');
+    addLog('ok', '-', '기록 텍스트 업로드 완료');
     return link;
   } catch(e) {
-    addLog('err', '✗', '텍스트 업로드 실패: ' + e.message);
+    addLog('err', '-', '텍스트 업로드 실패: ' + e.message);
     return null;
   }
 }
@@ -883,23 +883,23 @@ async function uploadTextToDrive(filename, content) {
 async function uploadFileToDrive(af) {
   if (!cfg.refreshToken || !cfg.folderId) { updateFileStatus(af.id, 'pending'); return null; }
   updateFileStatus(af.id, 'uploading');
-  addLog('info', '📎', `"${af.file.name}" 업로드 중...`);
+  addLog('info', 'fil', `"${af.file.name}" 업로드 중...`);
   try {
     const link = await driveUpload(af.file.name, af.file, af.file.type || 'application/octet-stream');
     updateFileStatus(af.id, 'done', link);
-    addLog('ok', '✓', `"${af.file.name}" 업로드 완료`);
+    addLog('ok', '-', `"${af.file.name}" 업로드 완료`);
     return link;
   } catch(e) {
     updateFileStatus(af.id, 'error');
-    addLog('err', '✗', `"${af.file.name}" 실패: ` + e.message);
+    addLog('err', '-', `"${af.file.name}" 실패: ` + e.message);
     return null;
   }
 }
 
-// ─── TELEGRAM ────────────────────────────────────────────────────────────────
+// --- TELEGRAM ----------------------------------------------------------------
 async function sendTelegram(text) {
-  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '⚠', '텔레그램 설정 없음 — 건너뜁니다'); return false; }
-  addLog('info', '✈', '텔레그램 발송 중...');
+  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '-', '텔레그램 설정 없음 - 건너뜁니다'); return false; }
+  addLog('info', '-', '텔레그램 발송 중...');
   try {
     const res = await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendMessage`, {
       method: 'POST',
@@ -907,12 +907,12 @@ async function sendTelegram(text) {
       body: JSON.stringify({ chat_id: cfg.chatId, text })
     });
     const data = await res.json();
-    if (data.ok) { addLog('ok', '✓', '텔레그램 발송 완료'); return true; }
-    addLog('err', '✗', '텔레그램 오류: ' + data.description); return false;
-  } catch(e) { addLog('err', '✗', '텔레그램 오류: ' + e.message); return false; }
+    if (data.ok) { addLog('ok', '-', '텔레그램 발송 완료'); return true; }
+    addLog('err', '-', '텔레그램 오류: ' + data.description); return false;
+  } catch(e) { addLog('err', '-', '텔레그램 오류: ' + e.message); return false; }
 }
 
-// ─── MAIN SUBMIT ─────────────────────────────────────────────────────────────
+// --- MAIN SUBMIT -------------------------------------------------------------
 async function submitAll() {
   const textPreview = buildRecord();
   if (!textPreview) { showToast('날짜, 프로젝트명, 제목은 필수입니다'); return; }
@@ -929,7 +929,7 @@ async function submitAll() {
   // 1. 첨부파일 업로드
   const fileLinks = [];
   if (attachedFiles.length) {
-    addLog('info', '📁', `첨부파일 ${attachedFiles.length}개 Drive 업로드 시작...`);
+    addLog('info', '-', `첨부파일 ${attachedFiles.length}개 Drive 업로드 시작...`);
     for (const af of attachedFiles) { fileLinks.push(await uploadFileToDrive(af)); tick(); }
   }
 
@@ -946,7 +946,7 @@ async function submitAll() {
   if (textLink) document.getElementById('manualLink').value = textLink;
 
   // 4. 텔레그램 발송
-  await sendTelegram(finalText + (textLink ? `\n📋 기록 파일: ${textLink}` : ''));
+  await sendTelegram(finalText + (textLink ? `\n- 기록 파일: ${textLink}` : ''));
   tick();
 
   // 5. 로컬 저장
@@ -962,7 +962,7 @@ async function submitAll() {
   renderHistory();
 
   setProgress(100); setTimeout(() => setProgress(0), 1200);
-  btn.disabled = false; btn.innerHTML = '💾 저장 + Drive 업로드 + 텔레그램 발송';
+  btn.disabled = false; btn.innerHTML = '- 저장 + Drive 업로드 + 텔레그램 발송';
   showToast('완료됐습니다!');
 }
 
@@ -976,7 +976,7 @@ async function onlyTelegram() {
 async function testTelegram() {
   if (!cfg.botToken || !cfg.chatId) { showToast('Bot Token과 Chat ID를 먼저 저장하세요'); return; }
   clearLog(); document.getElementById('setupPanel').classList.add('open');
-  await sendTelegram('✅ 상지서울 수발신 문서 기록 시스템\n테스트 메시지입니다. 연동이 정상 완료됐습니다!');
+  await sendTelegram('- 상지서울 수발신 문서 기록 시스템\n테스트 메시지입니다. 연동이 정상 완료됐습니다!');
 }
 function openDrive() {
   const link = v('manualLink');
@@ -1000,7 +1000,7 @@ function resetAll() {
   clearLog(); showToast('초기화됐습니다');
 }
 
-// ─── HISTORY ─────────────────────────────────────────────────────────────────
+// --- HISTORY -----------------------------------------------------------------
 function loadHistory() {
   try { const h = localStorage.getItem('sjs_docs'); if (h) history = JSON.parse(h); } catch(e) {}
   renderHistory();
@@ -1015,9 +1015,9 @@ function renderHistory() {
       <div class="rec-dot" style="background:${TYPE_COLORS[r.type] || '#888'}"></div>
       <div class="rec-info">
         <div class="rec-title">${r.title}</div>
-        <div class="rec-meta">${r.date} · ${r.type} · ${r.direction} · ${r.project}
-          ${r.attendees?.length ? ' · 참석자 ' + r.attendees.length + '명' : ''}
-          ${r.files?.length ? ' · 첨부 ' + r.files.length + '개' : ''}
+        <div class="rec-meta">${r.date} - ${r.type} - ${r.direction} - ${r.project}
+          ${r.attendees?.length ? ' - 참석자 ' + r.attendees.length + '명' : ''}
+          ${r.files?.length ? ' - 첨부 ' + r.files.length + '개' : ''}
         </div>
       </div>
       <div class="rec-copy">복사</div>
@@ -1035,7 +1035,7 @@ function clearHistory() {
   renderHistory(); showToast('삭제됐습니다');
 }
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+// --- TOAST -------------------------------------------------------------------
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
