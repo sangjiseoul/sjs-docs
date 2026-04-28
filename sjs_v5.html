@@ -177,11 +177,71 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .resend-btn{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:0.5px solid}
 .resend-btn.cancel{background:#fff;color:var(--text-2);border-color:var(--border)}
 .resend-btn.confirm{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* 수정 모달 */
+.edit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:none;align-items:center;justify-content:center;padding:16px}
+.edit-modal-overlay.open{display:flex}
+.edit-modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto}
+.edit-modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.edit-modal-sub{font-size:12px;color:var(--text-2);margin-bottom:16px;line-height:1.5}
+.edit-field{margin-bottom:12px}
+.edit-field label{font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.edit-field input,.edit-field textarea,.edit-field select{width:100%;padding:9px 11px;border:0.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none}
+.edit-field input:focus,.edit-field textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(26,158,116,0.1)}
+.edit-field textarea{min-height:160px;resize:vertical;line-height:1.65}
+.edit-modal-btns{display:flex;gap:8px;margin-top:16px}
+.edit-modal-btn{flex:1;padding:11px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:0.5px solid var(--border)}
+.edit-modal-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.edit-modal-btn.primary:hover{background:var(--green-dark)}
+.edit-modal-btn.ghost{background:#f5f4f0;color:var(--text-2)}
+.edit-pw-err{font-size:12px;color:var(--red);display:none;margin-bottom:8px}
 </style>
 </head>
 <body>
 
 <!-- 비밀번호 모달 -->
+
+<!-- 수정 모달 -->
+<div class="edit-modal-overlay" id="editModal">
+  <div class="edit-modal">
+    <div class="edit-modal-title">&#9998; 회의록 수정</div>
+    <div class="edit-modal-sub" id="editModalSub">본인이 작성한 기록만 수정할 수 있습니다.</div>
+
+    <!-- 비밀번호 단계 -->
+    <div id="editPwStep">
+      <div class="edit-field">
+        <label>작성자 이름 확인</label>
+        <input type="text" id="editPwAuthor" placeholder="원본 작성자 이름 입력">
+      </div>
+      <div class="edit-field">
+        <label>수정 비밀번호 (작성 시 사용한 비밀번호)</label>
+        <input type="password" id="editPwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkEditPw()">
+      </div>
+      <div class="edit-pw-err" id="editPwErr">작성자 이름 또는 비밀번호가 올바르지 않습니다.</div>
+      <div class="edit-modal-btns">
+        <button class="edit-modal-btn ghost" onclick="closeEditModal()">취소</button>
+        <button class="edit-modal-btn primary" onclick="checkEditPw()">확인</button>
+      </div>
+    </div>
+
+    <!-- 수정 단계 -->
+    <div id="editContentStep" style="display:none">
+      <div class="edit-field">
+        <label>주요 내용 수정</label>
+        <textarea id="editMemoInput" placeholder="수정할 내용을 입력하세요"></textarea>
+      </div>
+      <div class="edit-field">
+        <label>수정 사유 (선택)</label>
+        <input type="text" id="editReason" placeholder="예) 오탈자 수정, 내용 보완 등">
+      </div>
+      <div class="edit-modal-btns">
+        <button class="edit-modal-btn ghost" onclick="closeEditModal()">취소</button>
+        <button class="edit-modal-btn primary" onclick="saveEdit()">수정 저장 + 재전송</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="pwModal">
   <div class="modal-box">
     <div class="modal-title">&#128274; API 설정 잠금</div>
@@ -448,6 +508,8 @@ function fmtSize(b) {
 var selType = '공문';
 var lastSentKey = '';
 var pendingResend = false;
+var editTargetIdx = -1;
+var editPw = 'sjs2026';
 var attendees = [];
 var docHistory = [];
 var attachedFiles = [];
@@ -983,7 +1045,7 @@ function sendTelegramChunk(text) {
 }
 
 function sendTelegram(text) {
-  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '텔레그램 설정 없음 - 건너뜁니다'); return Promise.resolve(false); }
+  if (!cfg.botToken || !cfg.chatId) { if(cfg.botToken&&cfg.chatId){} else { addLog('warn', '텔레그램 미설정 - API 설정에서 Bot Token과 Chat ID를 입력하세요'); } return Promise.resolve(false); }
   addLog('info', '텔레그램 발송 중...');
   var MAX = 4000;
   if (text.length <= MAX) {
@@ -1105,6 +1167,8 @@ function doSubmit() {
           lastSentKey = buildSentKey();
           showSentBanner(gv('date'), gv('project'), gv('title'), selType, gv('manager'), textLink);
           showToast('전송이 완료됐습니다!');
+          // 3초 후 자동 초기화
+          setTimeout(function() { resetAll(); }, 3000);
         });
       });
     }).catch(function(e) {
@@ -1178,7 +1242,10 @@ function renderHistory() {
       + '<div class="rec-dot" style="background:' + color + '"></div>'
       + '<div class="rec-info"><div class="rec-title">' + r.title + '</div>'
       + '<div class="rec-meta">' + meta + '</div></div>'
-      + '<div class="rec-copy">복사</div></div>';
+      + '<div style="display:flex;gap:6px;flex-shrink:0">'
+      + '<span class="rec-copy" onclick="event.stopPropagation();copyRecord(' + i + ')">복사</span>'
+      + '<span style="font-size:11px;color:var(--text-2);cursor:pointer;font-weight:600" onclick="event.stopPropagation();openEditModal(' + i + ')">수정</span>'
+      + '</div></div>';
   }).join('');
 }
 
@@ -1235,6 +1302,95 @@ function confirmResend() {
   document.getElementById('resendBanner').classList.remove('show');
   pendingResend = true;
   doSubmit();
+}
+
+
+// -- 수정 기능 ----------------------------------------------------------------
+function openEditModal(idx) {
+  editTargetIdx = idx;
+  var rec = docHistory[idx];
+  document.getElementById('editPwAuthor').value = '';
+  document.getElementById('editPwInput').value = '';
+  document.getElementById('editPwErr').style.display = 'none';
+  document.getElementById('editPwStep').style.display = 'block';
+  document.getElementById('editContentStep').style.display = 'none';
+  document.getElementById('editModalSub').textContent = '"' + rec.title + '" 수정 - 본인 작성자 이름과 비밀번호를 입력하세요.';
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('editPwAuthor').focus(); }, 100);
+}
+
+function checkEditPw() {
+  var rec = docHistory[editTargetIdx];
+  var inputAuthor = document.getElementById('editPwAuthor').value.trim();
+  var inputPw = document.getElementById('editPwInput').value;
+  // 작성자 이름 일치 + 비밀번호 확인
+  if (inputAuthor === rec.author && inputPw === editPw) {
+    document.getElementById('editPwErr').style.display = 'none';
+    document.getElementById('editPwStep').style.display = 'none';
+    document.getElementById('editContentStep').style.display = 'block';
+    document.getElementById('editMemoInput').value = rec.memo || '';
+    document.getElementById('editReason').value = '';
+  } else {
+    document.getElementById('editPwErr').style.display = 'block';
+    document.getElementById('editPwInput').value = '';
+  }
+}
+
+function saveEdit() {
+  var rec = docHistory[editTargetIdx];
+  var newMemo = document.getElementById('editMemoInput').value.trim();
+  var reason = document.getElementById('editReason').value.trim();
+
+  // 기록 업데이트
+  rec.memo = newMemo;
+  rec.editedAt = new Date().toLocaleString('ko-KR');
+  rec.editReason = reason;
+
+  // 텍스트 재생성
+  var updatedText = buildRecordFromData(rec);
+  if (reason) updatedText += '\n\n[수정] ' + rec.editedAt + (reason ? ' - ' + reason : '');
+  rec.text = updatedText;
+
+  try { localStorage.setItem('sjs_docs', JSON.stringify(docHistory)); } catch(e) {}
+  renderHistory();
+
+  // 텔레그램 재발송
+  if (cfg.botToken && cfg.chatId) {
+    var tgMsg = '[수정된 회의록]\n' + updatedText;
+    if (reason) tgMsg += '\n\n 수정 사유: ' + reason;
+    sendTelegram(tgMsg).then(function() {
+      showToast('수정 저장 및 재전송 완료');
+    });
+  } else {
+    showToast('수정 저장 완료 (텔레그램 미설정)');
+  }
+  closeEditModal();
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  editTargetIdx = -1;
+}
+
+// 저장된 기록 데이터로 텍스트 재생성
+function buildRecordFromData(rec) {
+  var t = '\uD83D\uDCC4 수발신 문서 기록\n';
+  t += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n';
+  t += '\uD83D\uDCC5 날짜: ' + (rec.date||'') + '\n';
+  t += '\uD83D\uDD04 구분: ' + (rec.direction||'') + '\n';
+  t += '\uD83C\uDFD7 프로젝트: ' + (rec.project||'') + '\n';
+  t += '\uD83D\uDCCB 제목: ' + (rec.title||'') + '\n';
+  t += '\uD83D\uDDC2 유형: ' + (rec.type||'') + '\n\n';
+  if (rec.author) t += '\uD83D\uDC64 작성자: ' + rec.author + '\n';
+  if (rec.attendees && rec.attendees.length) t += '\uD83D\uDC65 참석자: ' + rec.attendees.join(', ') + '\n';
+  if (rec.memo) {
+    t += '\n\uD83D\uDCDD 주요 내용:\n';
+    t += rec.memo.split('\n').map(function(l){return '   '+l;}).join('\n') + '\n';
+  }
+  if (rec.driveLink) t += '\n\uD83D\uDD17 저장 위치: ' + rec.driveLink + '\n';
+  t += '\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
+  t += '\u23F0 기록시각: ' + (rec.ts ? new Date(rec.ts).toLocaleString('ko-KR') : '');
+  return t;
 }
 
 function showToast(msg) {
