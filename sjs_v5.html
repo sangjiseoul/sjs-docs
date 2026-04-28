@@ -149,23 +149,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .modal-btn.primary:hover{background:var(--green-dark)}
 .modal-btn.ghost{background:#f5f4f0;color:var(--text-2)}
 
-/* 공문 열람 패널 */
-.pdf-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);margin-bottom:14px;overflow:hidden;display:none}
-.pdf-panel.open{display:block}
-.pdf-panel-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border-light)}
-.pdf-panel-title{font-size:14px;font-weight:700}
-.pdf-list{padding:10px}
-.pdf-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.15s;text-decoration:none}
-.pdf-item:hover{background:var(--bg)}
-.pdf-icon{width:36px;height:36px;background:#FEF0EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--red);flex-shrink:0}
-.pdf-info{flex:1;min-width:0}
-.pdf-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pdf-size{font-size:11px;color:var(--text-3);margin-top:2px}
-.pdf-arrow{font-size:16px;color:var(--text-3);flex-shrink:0}
-.pdf-empty{text-align:center;padding:24px;color:var(--text-3);font-size:13px}
-.pdf-loading{text-align:center;padding:20px;color:var(--text-3);font-size:12px}
-.pdf-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#fff;border:1.5px solid var(--green);border-radius:10px;color:var(--green);font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
-.pdf-open-btn:hover{background:var(--green-light)}
 
 /* 텍스트 카운터 */
 .char-wrap{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
@@ -265,12 +248,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
       <span class="guide-link" onclick="showGuide('chat')">&#128204; Chat ID 확인 방법</span>
     </div>
   </div>
-
-      <div class="setup-field" style="margin-bottom:12px">
-      <label>수발신 공문 Drive 폴더 ID (PDF 열람용)</label>
-      <input type="text" id="cfgPdfFolderId" placeholder="공문 PDF 저장 폴더 URL 마지막 ID값">
-      <span class="guide-link" onclick="showGuide('folder')">&#128204; 폴더 ID 확인 방법</span>
-    </div>
     <div class="setup-field" style="margin-bottom:12px">
       <label>&#128274; API 설정 관리자 비밀번호</label>
       <input type="password" id="cfgAdminPw" placeholder="설정을 잠글 비밀번호 입력 (영문+숫자 권장)">
@@ -384,23 +361,6 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   </div>
 </div>
 
-
-<!-- 수발신 공문 열람 버튼 -->
-<button class="pdf-open-btn" onclick="togglePdfPanel()">
-  &#128196; 수발신 공문 열람
-</button>
-
-<!-- 공문 열람 패널 -->
-<div class="pdf-panel card" id="pdfPanel">
-  <div class="pdf-panel-head">
-    <div class="pdf-panel-title">&#128196; 수발신 공문 목록</div>
-    <button class="add-btn" style="font-size:12px" onclick="loadPdfList()">&#8635; 새로고침</button>
-  </div>
-  <div class="pdf-list" id="pdfList">
-    <div class="pdf-loading">Drive 연동 후 공문 목록이 표시됩니다</div>
-  </div>
-</div>
-
 <div class="card" id="recentCard" style="display:none">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div class="sec-label" style="margin:0">최근 기록</div>
@@ -452,7 +412,7 @@ var attendees = [];
 var docHistory = [];
 var attachedFiles = [];
 var fileIdCnt = 0;
-var cfg = {clientId:'',clientSecret:'',folderId:'',pdfFolderId:'',adminPw:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
+var cfg = {clientId:'',clientSecret:'',folderId:'',adminPw:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
 
 function toggleSetup() {
   var panel = document.getElementById('setupPanel');
@@ -543,7 +503,6 @@ function saveSetup() {
   cfg.folderId = document.getElementById('cfgFolderId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
-  cfg.pdfFolderId = document.getElementById('cfgPdfFolderId').value.trim();
   cfg.adminPw = document.getElementById('cfgAdminPw').value.trim();
   saveCfg();
   updateBadges();
@@ -605,10 +564,9 @@ function startGoogleAuth() {
   cfg.folderId = document.getElementById('cfgFolderId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
-  cfg.pdfFolderId = document.getElementById('cfgPdfFolderId').value.trim();
   cfg.adminPw = document.getElementById('cfgAdminPw').value.trim();
   saveCfg();
-  var redirectUri = encodeURIComponent(window.location.href.split('?')[0]);
+  var redirectUri = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
     + '?client_id=' + encodeURIComponent(clientId)
     + '&redirect_uri=' + redirectUri
@@ -626,7 +584,7 @@ function checkOAuthCallback() {
   window.history.replaceState({}, document.title, window.location.pathname);
   document.getElementById('setupPanel').classList.add('open');
   addLog('info', 'Google 인증 코드 수신 - Token 교환 중...');
-  var redirectUri = window.location.href.split('?')[0];
+  var redirectUri = window.location.href.split('?')[0].split('#')[0];
   fetch(TOKEN_URL, {
     method: 'POST',
     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -1148,79 +1106,6 @@ function clearHistory() {
 }
 
 
-function togglePdfPanel() {
-  var panel = document.getElementById('pdfPanel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) loadPdfList();
-}
-
-function loadPdfList() {
-  var list = document.getElementById('pdfList');
-  if (!cfg.pdfFolderId) {
-    list.innerHTML = '<div class="pdf-empty">API 설정에서 공문 Drive 폴더 ID를 먼저 입력하세요</div>';
-    return;
-  }
-  if (!cfg.refreshToken) {
-    list.innerHTML = '<div class="pdf-empty">Google 인증이 필요합니다. API 설정에서 인증하세요</div>';
-    return;
-  }
-  list.innerHTML = '<div class="pdf-loading">&#8635; 목록 불러오는 중...</div>';
-  getAccessToken().then(function(token) {
-    if (!token) {
-      list.innerHTML = '<div class="pdf-empty">인증 토큰 오류. API 설정에서 Google 재인증해주세요</div>';
-      return;
-    }
-    var query = "'" + cfg.pdfFolderId + "' in parents and trashed=false";
-    var url = 'https://www.googleapis.com/drive/v3/files'
-      + '?q=' + encodeURIComponent(query)
-      + '&fields=files(id,name,size,mimeType,webViewLink,modifiedTime)'
-      + '&orderBy=modifiedTime desc'
-      + '&pageSize=100'
-      + '&supportsAllDrives=true'
-      + '&includeItemsFromAllDrives=true';
-    return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.error) {
-          list.innerHTML = '<div class="pdf-empty">Drive API 오류 ' + data.error.code + ': ' + data.error.message + '</div>';
-          return;
-        }
-        if (!data.files || !data.files.length) {
-          list.innerHTML = '<div class="pdf-empty">파일이 없거나 접근 권한이 없습니다.<br>폴더 ID가 정확한지 확인하고 Google 재인증 후 다시 시도하세요</div>';
-          return;
-        }
-        var html = '';
-        data.files.forEach(function(f) {
-          var size = '';
-          if (f.size) {
-            var bytes = parseInt(f.size);
-            size = bytes < 1048576 ? Math.round(bytes/1024)+'KB' : (bytes/1048576).toFixed(1)+'MB';
-          }
-          var date = f.modifiedTime ? f.modifiedTime.slice(0,10) : '';
-          var mimeType = f.mimeType || '';
-          var isFolder = mimeType.indexOf('folder') >= 0;
-          var isPdf = mimeType.indexOf('pdf') >= 0;
-          var icon = isFolder ? 'DIR' : (isPdf ? 'PDF' : 'FILE');
-          var iconStyle = isFolder ? 'background:#EEF5FE;color:#1a73e8' : (isPdf ? '' : 'background:#F1EFE8;color:#888');
-          var link = isFolder
-            ? 'https://drive.google.com/drive/folders/' + f.id
-            : (f.webViewLink || 'https://drive.google.com/file/d/' + f.id + '/view');
-          var meta = date + (size ? ' &middot; ' + size : '') + (isFolder ? ' (폴더)' : '');
-          html += '<a class="pdf-item" href="' + link + '" target="_blank">';
-          html += '<div class="pdf-icon" style="' + iconStyle + '">' + icon + '</div>';
-          html += '<div class="pdf-info">';
-          html += '<div class="pdf-name">' + f.name + '</div>';
-          html += '<div class="pdf-size">' + meta + '</div>';
-          html += '</div>';
-          html += '<span class="pdf-arrow">&#8599;</span>';
-          html += '</a>';
-        });
-        list.innerHTML = html;
-      });
-  }).catch(function(e) {
-    list.innerHTML = '<div class="pdf-empty">오류: ' + e.message + '</div>';
-  });
-}
 
 function showToast(msg) {
   var t = document.getElementById('toast');
