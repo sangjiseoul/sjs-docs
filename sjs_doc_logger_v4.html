@@ -133,9 +133,57 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#1C1B18;color:#fff;font-size:13px;font-family:'Noto Sans KR',sans-serif;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:all 0.25s;z-index:9999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:500px){.grid{grid-template-columns:1fr}.field.full{grid-column:1}.action-bar{grid-template-columns:1fr}}
+
+/* 비밀번호 모달 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;display:none}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:28px 24px;width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--text-2);margin-bottom:18px;line-height:1.5}
+.modal-input{width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;margin-bottom:10px}
+.modal-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(26,158,116,0.1)}
+.modal-err{font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+.modal-btns{display:flex;gap:8px}
+.modal-btn{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:0.5px solid var(--border)}
+.modal-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.modal-btn.primary:hover{background:var(--green-dark)}
+.modal-btn.ghost{background:#f5f4f0;color:var(--text-2)}
+
+/* 공문 열람 패널 */
+.pdf-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);margin-bottom:14px;overflow:hidden;display:none}
+.pdf-panel.open{display:block}
+.pdf-panel-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border-light)}
+.pdf-panel-title{font-size:14px;font-weight:700}
+.pdf-list{padding:10px}
+.pdf-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.15s;text-decoration:none}
+.pdf-item:hover{background:var(--bg)}
+.pdf-icon{width:36px;height:36px;background:#FEF0EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--red);flex-shrink:0}
+.pdf-info{flex:1;min-width:0}
+.pdf-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdf-size{font-size:11px;color:var(--text-3);margin-top:2px}
+.pdf-arrow{font-size:16px;color:var(--text-3);flex-shrink:0}
+.pdf-empty{text-align:center;padding:24px;color:var(--text-3);font-size:13px}
+.pdf-loading{text-align:center;padding:20px;color:var(--text-3);font-size:12px}
+.pdf-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#fff;border:1.5px solid var(--green);border-radius:10px;color:var(--green);font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
+.pdf-open-btn:hover{background:var(--green-light)}
 </style>
 </head>
 <body>
+
+<!-- 비밀번호 모달 -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal-box">
+    <div class="modal-title">&#128274; API 설정 잠금</div>
+    <div class="modal-sub">관리자 비밀번호를 입력하세요.<br>배포자 외 무단 변경이 제한됩니다.</div>
+    <input type="password" class="modal-input" id="pwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="modal-err" id="pwErr">비밀번호가 올바르지 않습니다.</div>
+    <div class="modal-btns">
+      <button class="modal-btn ghost" onclick="closePwModal()">취소</button>
+      <button class="modal-btn primary" onclick="checkPw()">확인</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 
 <div class="topbar">
@@ -208,7 +256,17 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
     </div>
   </div>
 
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      <div class="setup-field" style="margin-bottom:12px">
+      <label>수발신 공문 Drive 폴더 ID (PDF 열람용)</label>
+      <input type="text" id="cfgPdfFolderId" placeholder="공문 PDF 저장 폴더 URL 마지막 ID값">
+      <span class="guide-link" onclick="showGuide('folder')">&#128204; 폴더 ID 확인 방법</span>
+    </div>
+    <div class="setup-field" style="margin-bottom:12px">
+      <label>&#128274; API 설정 관리자 비밀번호</label>
+      <input type="password" id="cfgAdminPw" placeholder="설정을 잠글 비밀번호 입력 (영문+숫자 권장)">
+      <span style="font-size:11px;color:var(--text-3);margin-top:4px;display:block">설정 후 저장하면 이후 API 설정 진입 시 비밀번호 확인이 필요합니다</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
     <button class="save-btn" onclick="saveSetup()">&#10003; 설정 저장</button>
     <button class="save-btn ghost" onclick="testTelegram()">텔레그램 테스트 발송</button>
   </div>
@@ -313,6 +371,23 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   </div>
 </div>
 
+
+<!-- 수발신 공문 열람 버튼 -->
+<button class="pdf-open-btn" onclick="togglePdfPanel()">
+  &#128196; 수발신 공문 열람
+</button>
+
+<!-- 공문 열람 패널 -->
+<div class="pdf-panel card" id="pdfPanel">
+  <div class="pdf-panel-head">
+    <div class="pdf-panel-title">&#128196; 수발신 공문 목록</div>
+    <button class="add-btn" style="font-size:12px" onclick="loadPdfList()">&#8635; 새로고침</button>
+  </div>
+  <div class="pdf-list" id="pdfList">
+    <div class="pdf-loading">Drive 연동 후 공문 목록이 표시됩니다</div>
+  </div>
+</div>
+
 <div class="card" id="recentCard" style="display:none">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div class="sec-label" style="margin:0">최근 기록</div>
@@ -364,10 +439,38 @@ var attendees = [];
 var docHistory = [];
 var attachedFiles = [];
 var fileIdCnt = 0;
-var cfg = {clientId:'',clientSecret:'',folderId:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
+var cfg = {clientId:'',clientSecret:'',folderId:'',pdfFolderId:'',adminPw:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
 
 function toggleSetup() {
-  document.getElementById('setupPanel').classList.toggle('open');
+  var panel = document.getElementById('setupPanel');
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+  } else {
+    if (cfg.adminPw) {
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwErr').style.display = 'none';
+      document.getElementById('pwModal').classList.add('open');
+      setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
+    } else {
+      panel.classList.add('open');
+    }
+  }
+}
+
+function checkPw() {
+  var input = document.getElementById('pwInput').value;
+  if (input === cfg.adminPw) {
+    document.getElementById('pwModal').classList.remove('open');
+    document.getElementById('setupPanel').classList.add('open');
+  } else {
+    document.getElementById('pwErr').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function closePwModal() {
+  document.getElementById('pwModal').classList.remove('open');
 }
 
 function init() {
@@ -405,6 +508,8 @@ function saveSetup() {
   cfg.folderId = document.getElementById('cfgFolderId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
+  cfg.pdfFolderId = document.getElementById('cfgPdfFolderId').value.trim();
+  cfg.adminPw = document.getElementById('cfgAdminPw').value.trim();
   saveCfg();
   updateBadges();
   updateBanner();
@@ -465,6 +570,8 @@ function startGoogleAuth() {
   cfg.folderId = document.getElementById('cfgFolderId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
+  cfg.pdfFolderId = document.getElementById('cfgPdfFolderId').value.trim();
+  cfg.adminPw = document.getElementById('cfgAdminPw').value.trim();
   saveCfg();
   var redirectUri = encodeURIComponent(window.location.href.split('?')[0]);
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -981,6 +1088,52 @@ function clearHistory() {
   docHistory = [];
   try { localStorage.removeItem('sjs_docs'); } catch(e) {}
   renderHistory(); showToast('삭제됐습니다');
+}
+
+
+function togglePdfPanel() {
+  var panel = document.getElementById('pdfPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) loadPdfList();
+}
+
+function loadPdfList() {
+  var list = document.getElementById('pdfList');
+  if (!cfg.pdfFolderId || !cfg.refreshToken) {
+    list.innerHTML = '<div class="pdf-empty">API 설정에서 공문 Drive 폴더 ID를 입력하고 Google 인증을 완료하세요</div>';
+    return;
+  }
+  list.innerHTML = '<div class="pdf-loading">&#8635; 목록 불러오는 중...</div>';
+  getAccessToken().then(function(token) {
+    if (!token) { list.innerHTML = '<div class="pdf-empty">인증이 필요합니다. API 설정에서 Google 인증을 완료하세요</div>'; return; }
+    var url = 'https://www.googleapis.com/drive/v3/files'
+      + '?q=' + encodeURIComponent("'" + cfg.pdfFolderId + "' in parents and trashed=false")
+      + '&fields=files(id,name,size,mimeType,webViewLink,createdTime)'
+      + '&orderBy=createdTime desc'
+      + '&pageSize=50';
+    return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.files || !data.files.length) {
+          list.innerHTML = '<div class="pdf-empty">등록된 공문이 없습니다.<br>Drive 폴더에 PDF를 업로드하면 여기에 표시됩니다.</div>';
+          return;
+        }
+        list.innerHTML = data.files.map(function(f) {
+          var size = f.size ? (parseInt(f.size)/1024 < 1024 ? (parseInt(f.size)/1024).toFixed(0)+'KB' : (parseInt(f.size)/1048576).toFixed(1)+'MB') : '';
+          var date = f.createdTime ? f.createdTime.slice(0,10) : '';
+          var isPdf = (f.mimeType||'').indexOf('pdf') >= 0;
+          var icon = isPdf ? 'PDF' : 'FILE';
+          return '<a class="pdf-item" href="' + (f.webViewLink||'#') + '" target="_blank">'
+            + '<div class="pdf-icon">' + icon + '</div>'
+            + '<div class="pdf-info"><div class="pdf-name">' + f.name + '</div>'
+            + '<div class="pdf-size">' + (date?date+' &middot; ':'') + size + '</div></div>'
+            + '<span class="pdf-arrow">&#8599;</span>'
+            + '</a>';
+        }).join('');
+      });
+  }).catch(function(e) {
+    list.innerHTML = '<div class="pdf-empty">불러오기 실패: ' + e.message + '</div>';
+  });
 }
 
 function showToast(msg) {
