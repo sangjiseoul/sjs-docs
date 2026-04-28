@@ -166,6 +166,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .pdf-loading{text-align:center;padding:20px;color:var(--text-3);font-size:12px}
 .pdf-open-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#fff;border:1.5px solid var(--green);border-radius:10px;color:var(--green);font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
 .pdf-open-btn:hover{background:var(--green-light)}
+
+/* 텍스트 카운터 */
+.char-wrap{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
+.char-bar-bg{flex:1;height:4px;background:var(--border-light);border-radius:4px;margin-right:10px;overflow:hidden}
+.char-bar-fill{height:100%;border-radius:4px;background:var(--green);transition:width 0.2s,background 0.2s;width:0%}
+.char-bar-fill.warn{background:var(--orange)}
+.char-bar-fill.danger{background:var(--red)}
+.char-counter-text{font-size:11px;color:var(--text-3);white-space:nowrap;transition:color 0.2s}
+.char-counter-text.warn{color:var(--orange)}
+.char-counter-text.danger{color:var(--red);font-weight:600}
 </style>
 </head>
 <body>
@@ -327,8 +337,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <div class="sec-label">주요 내용</div>
   <div class="field">
     <label>협의사항 / 특이사항</label>
-    <textarea id="memo" placeholder="핵심 내용, 결정사항, 특이사항 등을 기록"></textarea>
-    <div class="char-count" id="charCount">0자</div>
+    <textarea id="memo" placeholder="핵심 내용, 결정사항, 특이사항 등을 기록" maxlength="3800"></textarea>
+    <div class="char-wrap">
+      <div class="char-bar-bg"><div class="char-bar-fill" id="charBar"></div></div>
+      <span class="char-counter-text" id="charCount">0 / 3800자</span>
+    </div>
   </div>
   <div class="divider"></div>
   <div class="field">
@@ -473,10 +486,32 @@ function closePwModal() {
   document.getElementById('pwModal').classList.remove('open');
 }
 
+function updateCharCount(len) {
+  var MAX = 3800;
+  var pct = Math.min((len / MAX) * 100, 100);
+  var remaining = MAX - len;
+  var bar = document.getElementById('charBar');
+  var counter = document.getElementById('charCount');
+  bar.style.width = pct + '%';
+  if (pct >= 95) {
+    bar.className = 'char-bar-fill danger';
+    counter.className = 'char-counter-text danger';
+    counter.textContent = len + ' / ' + MAX + '자 ('+remaining+'자 남음)';
+  } else if (pct >= 80) {
+    bar.className = 'char-bar-fill warn';
+    counter.className = 'char-counter-text warn';
+    counter.textContent = len + ' / ' + MAX + '자 ('+remaining+'자 남음)';
+  } else {
+    bar.className = 'char-bar-fill';
+    counter.className = 'char-counter-text';
+    counter.textContent = len + ' / ' + MAX + '자';
+  }
+}
+
 function init() {
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
   document.getElementById('memo').addEventListener('input', function() {
-    document.getElementById('charCount').textContent = this.value.length + '자';
+    updateCharCount(this.value.length);
   });
   loadCfg();
   loadHistory();
@@ -906,19 +941,42 @@ function uploadFile(af, folderId) {
   });
 }
 
-function sendTelegram(text) {
-  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '텔레그램 설정 없음 - 건너뜁니다'); return Promise.resolve(false); }
-  addLog('info', '텔레그램 발송 중...');
+function sendTelegramChunk(text) {
   return fetch('https://api.telegram.org/bot' + cfg.botToken + '/sendMessage', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({chat_id: cfg.chatId, text: text})
-  }).then(function(res) { return res.json(); }).then(function(data) {
-    if (data.ok) { addLog('ok', '텔레그램 발송 완료'); return true; }
-    addLog('err', '텔레그램 오류: ' + data.description); return false;
-  }).catch(function(e) {
-    addLog('err', '텔레그램 오류: ' + e.message); return false;
+  }).then(function(r) { return r.json(); });
+}
+
+function sendTelegram(text) {
+  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '텔레그램 설정 없음 - 건너뜁니다'); return Promise.resolve(false); }
+  addLog('info', '텔레그램 발송 중...');
+  var MAX = 4000;
+  if (text.length <= MAX) {
+    return sendTelegramChunk(text).then(function(data) {
+      if (data.ok) { addLog('ok', '텔레그램 발송 완료'); return true; }
+      addLog('err', '텔레그램 오류: ' + data.description); return false;
+    }).catch(function(e) { addLog('err', '텔레그램 오류: ' + e.message); return false; });
+  }
+  var chunks = [];
+  var total = Math.ceil(text.length / MAX);
+  for (var i = 0; i < total; i++) {
+    var prefix = '(' + (i+1) + '/' + total + ')
+';
+    chunks.push(prefix + text.slice(i * MAX, (i+1) * MAX));
+  }
+  addLog('info', '내용이 길어 ' + total + '개로 분할 발송합니다...');
+  var chain = Promise.resolve(true);
+  chunks.forEach(function(chunk, idx) {
+    chain = chain.then(function() {
+      return sendTelegramChunk(chunk).then(function(data) {
+        if (data.ok) { addLog('ok', '텔레그램 발송 완료 (' + (idx+1) + '/' + total + ')'); return true; }
+        addLog('err', '텔레그램 오류: ' + data.description); return false;
+      });
+    });
   });
+  return chain;
 }
 
 function submitAll() {
@@ -1044,7 +1102,7 @@ function resetAll() {
     document.getElementById(id).value = '';
   });
   document.getElementById('direction').value = '수신';
-  document.getElementById('charCount').textContent = '0자';
+  updateCharCount(0);
   attendees = []; renderTags();
   attachedFiles = []; renderFiles();
   document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('on'); });
@@ -1110,24 +1168,37 @@ function loadPdfList() {
   list.innerHTML = '<div class="pdf-loading">&#8635; 목록 불러오는 중...</div>';
   getAccessToken().then(function(token) {
     if (!token) {
-      list.innerHTML = '<div class="pdf-empty">인증 토큰을 가져오지 못했습니다. API 설정에서 Google 재인증을 해주세요</div>';
+      list.innerHTML = '<div class="pdf-empty">인증 토큰 오류. API 설정에서 Google 재인증해주세요</div>';
       return;
     }
+    // trashed=false 조건만으로 해당 폴더 내 모든 파일 조회
     var query = "'" + cfg.pdfFolderId + "' in parents and trashed=false";
     var url = 'https://www.googleapis.com/drive/v3/files'
       + '?q=' + encodeURIComponent(query)
-      + '&fields=files(id,name,size,mimeType,webViewLink,createdTime)'
-      + '&orderBy=createdTime desc'
-      + '&pageSize=100';
+      + '&fields=files(id,name,size,mimeType,webViewLink,modifiedTime)'
+      + '&orderBy=modifiedTime desc'
+      + '&pageSize=100'
+      + '&supportsAllDrives=true'
+      + '&includeItemsFromAllDrives=true';
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
+        // 오류 응답 상세 표시
         if (data.error) {
-          list.innerHTML = '<div class="pdf-empty">오류: ' + data.error.message + '</div>';
+          list.innerHTML = '<div class="pdf-empty">'
+            + 'Drive API 오류 (' + data.error.code + ')<br>'
+            + data.error.message + '<br><br>'
+            + '폴더 ID: ' + cfg.pdfFolderId + '<br>'
+            + '확인: Drive 폴더가 해당 Google 계정 소유인지 확인하세요</div>';
           return;
         }
         if (!data.files || !data.files.length) {
-          list.innerHTML = '<div class="pdf-empty">등록된 파일이 없습니다.<br>Drive 폴더에 공문 PDF를 업로드하면 여기에 표시됩니다.</div>';
+          list.innerHTML = '<div class="pdf-empty">'
+            + '파일이 없거나 접근 권한이 없습니다.<br><br>'
+            + '폴더 ID: ' + cfg.pdfFolderId + '<br>'
+            + '1. Drive에서 해당 폴더를 열어 파일이 있는지 확인<br>'
+            + '2. 폴더 ID가 정확한지 확인 (URL 마지막 부분)<br>'
+            + '3. API 설정에서 Google 재인증 후 다시 시도</div>';
           return;
         }
         list.innerHTML = data.files.map(function(f) {
@@ -1136,22 +1207,25 @@ function loadPdfList() {
             var bytes = parseInt(f.size);
             size = bytes < 1048576 ? Math.round(bytes/1024)+'KB' : (bytes/1048576).toFixed(1)+'MB';
           }
-          var date = f.createdTime ? f.createdTime.slice(0,10) : '';
-          var isPdf = (f.mimeType||'').indexOf('pdf') >= 0;
-          var icon = isPdf ? 'PDF' : 'FILE';
+          var date = f.modifiedTime ? f.modifiedTime.slice(0,10) : '';
+          var mimeType = f.mimeType || '';
+          var isFolder = mimeType.indexOf('folder') >= 0;
+          var isPdf = mimeType.indexOf('pdf') >= 0;
+          var icon = isFolder ? 'DIR' : (isPdf ? 'PDF' : 'FILE');
           var link = f.webViewLink || ('https://drive.google.com/file/d/' + f.id + '/view');
+          if (isFolder) link = 'https://drive.google.com/drive/folders/' + f.id;
           return '<a class="pdf-item" href="' + link + '" target="_blank">'
-            + '<div class="pdf-icon">' + icon + '</div>'
+            + '<div class="pdf-icon" style="' + (isFolder?'background:#EEF5FE;color:#1a73e8':isPdf?'':'background:#F1EFE8;color:#888') + '">' + icon + '</div>'
             + '<div class="pdf-info">'
             + '<div class="pdf-name">' + f.name + '</div>'
-            + '<div class="pdf-size">' + (date ? date + (size?' &middot; '+size:'') : size) + '</div>'
+            + '<div class="pdf-size">' + (date?date+(size?' &middot; '+size:''):'') + (isFolder?' (폴더)':'') + '</div>'
             + '</div>'
             + '<span class="pdf-arrow">&#8599;</span>'
             + '</a>';
         }).join('');
       });
   }).catch(function(e) {
-    list.innerHTML = '<div class="pdf-empty">불러오기 실패: ' + e.message + '</div>';
+    list.innerHTML = '<div class="pdf-empty">오류: ' + e.message + '</div>';
   });
 }
 
