@@ -14,65 +14,46 @@
   --text:#1C1B18;--text-2:#6B6960;--text-3:#9A9890;
   --red:#C0392B;--red-light:#FEF0EE;
   --orange:#E67E22;--orange-light:#FEF9E7;
-  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow:0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
 }
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 60px}
 .wrap{max-width:700px;margin:0 auto}
-
-/* TOP BAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
 .brand{display:flex;align-items:center;gap:10px}
-.brand-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.5px}
-.brand-name{font-size:16px;font-weight:700;color:var(--text)}
+.brand-icon{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.brand-name{font-size:16px;font-weight:700}
 .brand-sub{font-size:11px;color:var(--text-3);margin-top:1px}
-.settings-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--card);color:var(--text-2);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
+.settings-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--card);color:var(--text-2);font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s}
 .settings-btn:hover{border-color:var(--green);color:var(--green)}
-
-/* API STATUS */
 .api-status{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .api-badge{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:0.5px solid var(--border);font-size:11px;background:var(--card)}
-.api-badge .dot{width:6px;height:6px;border-radius:50%;background:#ccc}
-.api-badge .dot.ok{background:#27AE60}
-.api-badge .dot.warn{background:var(--orange)}
-.api-badge .dot.none{background:#ccc}
-
-/* SETUP PANEL */
-.setup-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:var(--shadow);display:none}
+.dot{width:6px;height:6px;border-radius:50%;background:#ccc}
+.dot.ok{background:#27AE60}
+.setup-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:16px;display:none}
 .setup-panel.open{display:block}
-.setup-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
 .setup-desc{font-size:12px;color:var(--text-2);margin-bottom:16px;line-height:1.6}
-.setup-grid{display:grid;gap:14px}
-.setup-field label{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:5px}
+.setup-grid{display:grid;gap:12px;margin-bottom:16px}
+.setup-field label{font-size:11px;font-weight:600;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em}
 .setup-row{display:flex;gap:8px}
 .setup-row input{flex:1}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0;margin-top:10px}
-.status-dot.ok{background:#27AE60}
-.guide-link{font-size:11px;color:var(--green);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:6px;cursor:pointer}
+.guide-link{font-size:11px;color:var(--green);cursor:pointer;display:inline-block;margin-top:5px}
 .guide-link:hover{text-decoration:underline}
-.save-setup-btn{margin-top:4px;padding:9px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s}
-.save-setup-btn:hover{background:var(--green-dark)}
-
-/* 섹션 구분선 */
-.setup-section{margin-top:4px}
-.setup-section-title{font-size:12px;font-weight:700;color:var(--text);padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-
-/* 인증 상태 배너 */
-.auth-banner{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;line-height:1.5}
+.auth-banner{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;line-height:1.5}
 .auth-banner.ok{background:var(--green-light);color:#0d7a57;border:0.5px solid #a8dfc9}
 .auth-banner.warn{background:var(--orange-light);color:#875A00;border:0.5px solid #f0d090}
 .auth-banner.none{background:#F5F4F0;color:var(--text-2);border:0.5px solid var(--border)}
-
-/* OAUTH 버튼 */
-.oauth-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;border:0.5px solid var(--border);background:#fff;color:var(--text);font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow)}
-.oauth-btn:hover{border-color:var(--blue);color:var(--blue);box-shadow:var(--shadow-md)}
-.oauth-btn .g-icon{width:18px;height:18px}
-
-/* CARD */
-.card{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.oauth-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:8px;border:0.5px solid var(--border);background:#fff;color:var(--text);font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all 0.15s}
+.oauth-btn:hover{border-color:var(--blue);color:var(--blue)}
+.save-btn{padding:9px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
+.save-btn:hover{background:var(--green-dark)}
+.save-btn.ghost{background:#f1efe8;color:var(--text-2);border:0.5px solid var(--border)}
+.divider{height:0.5px;background:var(--border-light);margin:14px 0}
+.section-title{font-size:12px;font-weight:700;color:var(--text);padding:7px 12px;background:var(--bg);border-radius:8px;margin-bottom:12px}
+.guide-box{display:none;margin-top:14px;background:#F7F6F2;border-radius:10px;padding:14px;font-size:12px;line-height:1.9}
+.card{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:20px;margin-bottom:14px}
 .sec-label{font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .sec-label::after{content:'';flex:1;height:0.5px;background:var(--border-light)}
-
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .field{display:flex;flex-direction:column;gap:4px}
 .field.full{grid-column:1/-1}
@@ -81,404 +62,311 @@ input,select,textarea{font-family:'Noto Sans KR',sans-serif;font-size:14px;color
 input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(26,158,116,0.1);background:#fff}
 textarea{resize:vertical;min-height:80px;line-height:1.65}
 .char-count{font-size:11px;color:var(--text-3);text-align:right;margin-top:3px}
-
 .type-wrap{display:flex;gap:6px;flex-wrap:wrap}
 .type-btn{font-size:12px;padding:5px 13px;border-radius:20px;border:0.5px solid var(--border);background:#FAFAF8;color:var(--text-2);cursor:pointer;transition:all 0.15s;font-family:'Noto Sans KR',sans-serif}
-.type-btn:hover{border-color:var(--green);color:var(--green)}
 .type-btn.on{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:600}
-
-.attendee-row{display:flex;gap:8px;margin-bottom:8px}
-.attendee-row input{flex:1}
-.add-btn{padding:9px 14px;border-radius:8px;border:0.5px solid var(--border);background:#FAFAF8;color:var(--text-2);cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;transition:all 0.15s}
+.att-row{display:flex;gap:8px;margin-bottom:8px}
+.att-row input{flex:1}
+.add-btn{padding:9px 14px;border-radius:8px;border:0.5px solid var(--border);background:#FAFAF8;color:var(--text-2);cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
 .add-btn:hover{border-color:var(--green);color:var(--green)}
-.tags{display:flex;flex-wrap:wrap;gap:6px;min-height:10px}
-.tag{display:inline-flex;align-items:center;gap:4px;background:#F1EFE8;border:0.5px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text)}
-.tag-x{cursor:pointer;color:var(--text-3);font-size:15px;line-height:1;transition:color 0.1s}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:#F1EFE8;border:0.5px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px}
+.tag-x{cursor:pointer;color:var(--text-3);font-size:15px;line-height:1}
 .tag-x:hover{color:var(--red)}
-
 .docnum-row{display:flex;gap:6px}
 .docnum-row input{flex:1}
-.auto-btn{padding:9px 12px;border-radius:8px;border:0.5px solid var(--border);background:#FAFAF8;color:var(--text-2);cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;transition:all 0.15s}
+.auto-btn{padding:9px 12px;border-radius:8px;border:0.5px solid var(--border);background:#FAFAF8;color:var(--text-2);cursor:pointer;font-size:12px;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
 .auto-btn:hover{border-color:var(--green);color:var(--green)}
-
-/* FILE ATTACHMENT */
-.file-drop-zone{border:1.5px dashed var(--border);border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:#FAFAF8;position:relative}
-.file-drop-zone:hover,.file-drop-zone.dragover{border-color:var(--green);background:var(--green-light)}
-.file-drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.drop-icon{font-size:28px;margin-bottom:6px}
-.drop-text{font-size:13px;color:var(--text-2);font-weight:500}
+.drop-zone{border:1.5px dashed var(--border);border-radius:10px;padding:22px 16px;text-align:center;cursor:pointer;background:#FAFAF8;position:relative;transition:all 0.2s}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--green);background:var(--green-light)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-text{font-size:13px;color:var(--text-2);font-weight:500;margin-top:6px}
 .drop-sub{font-size:11px;color:var(--text-3);margin-top:4px}
+.file-bar{margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .file-list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.file-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#FAFAF8;border:0.5px solid var(--border-light);border-radius:9px;animation:fadeIn 0.2s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.file-icon{font-size:20px;flex-shrink:0}
+.file-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#FAFAF8;border:0.5px solid var(--border-light);border-radius:9px}
 .file-info{flex:1;min-width:0}
-.file-name{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.file-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .file-size{font-size:11px;color:var(--text-3);margin-top:2px}
-.file-status{font-size:11px;flex-shrink:0;padding:3px 8px;border-radius:20px;font-weight:500}
+.file-status{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
 .file-status.pending{background:#F1EFE8;color:var(--text-2)}
 .file-status.uploading{background:#EEF5FE;color:#1558b0}
 .file-status.done{background:var(--green-light);color:var(--green-dark)}
 .file-status.error{background:var(--red-light);color:var(--red)}
-.file-del{cursor:pointer;color:var(--text-3);font-size:18px;line-height:1;flex-shrink:0;transition:color 0.1s;padding:2px 4px}
+.file-del{cursor:pointer;color:var(--text-3);font-size:18px;flex-shrink:0}
 .file-del:hover{color:var(--red)}
-.file-link{font-size:11px;color:var(--blue);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;margin-top:2px}
-.file-link:hover{text-decoration:underline}
-
-/* OUTPUT */
-.output-box{background:#FAFAF8;border:0.5px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap;min-height:110px;font-family:'Noto Sans KR',sans-serif;word-break:break-all}
+.file-link{font-size:11px;color:var(--blue);text-decoration:none;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.output-box{background:#FAFAF8;border:0.5px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:1.75;white-space:pre-wrap;min-height:110px;font-family:'Noto Sans KR',sans-serif;word-break:break-all}
 .output-box.empty{color:var(--text-3);font-style:italic}
-
-/* BUTTONS */
+.progress-bar{height:3px;background:var(--border-light);border-radius:3px;overflow:hidden;margin-top:10px;display:none}
+.progress-bar.show{display:block}
+.progress-fill{height:100%;background:var(--green);border-radius:3px;width:0;transition:width 0.3s}
+.log-wrap{margin-top:10px;display:none;max-height:200px;overflow-y:auto}
+.log-wrap.show{display:block}
+.log-item{display:flex;gap:8px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:12px}
+.log-item.info{background:#EEF5FE;color:#1558b0}
+.log-item.ok{background:#E6F7F1;color:#0d7a57}
+.log-item.err{background:var(--red-light);color:var(--red)}
+.log-item.warn{background:var(--orange-light);color:#875A00}
 .action-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .action-bar .main-btn{grid-column:1/-1}
 .btn{font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:11px 16px;border-radius:9px;border:0.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
 .btn:hover{background:var(--bg)}
 .btn:active{transform:scale(0.98)}
-.btn.primary{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,158,116,0.3)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
 .btn.primary:hover{background:var(--green-dark)}
 .btn.tg{background:var(--tg);border-color:var(--tg);color:#fff}
 .btn.tg:hover{background:#1e3d5c}
 .btn.drive{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn.drive:hover{background:#1558b0}
 .btn.ghost{background:transparent;color:var(--text-2)}
-.btn.ghost:hover{background:var(--bg);color:var(--text)}
-.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-.btn .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* PROGRESS */
-.progress-bar{height:3px;background:var(--border-light);border-radius:3px;overflow:hidden;margin-top:10px;display:none}
-.progress-bar.show{display:block}
-.progress-fill{height:100%;background:var(--green);border-radius:3px;width:0;transition:width 0.3s ease}
-
-/* LOG */
-.log-wrap{margin-top:10px;display:none}
-.log-wrap.show{display:block}
-.log-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:12px;animation:fadeIn 0.2s ease}
-.log-item.info{background:#EEF5FE;color:#1558b0}
-.log-item.ok{background:#E6F7F1;color:#0d7a57}
-.log-item.err{background:var(--red-light);color:var(--red)}
-.log-item.warn{background:var(--orange-light);color:#875A00}
-.log-icon{font-size:13px;flex-shrink:0}
-
-/* RECENT */
-.recent-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.rec-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FAFAF8;border:0.5px solid var(--border-light);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all 0.15s}
-.rec-item:hover{background:var(--bg);border-color:var(--border)}
+.rec-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FAFAF8;border:0.5px solid var(--border-light);border-radius:10px;margin-bottom:6px;cursor:pointer}
+.rec-item:hover{background:var(--bg)}
 .rec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .rec-info{flex:1;min-width:0}
-.rec-title{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec-meta{font-size:11px;color:var(--text-3);margin-top:2px}
 .rec-copy{font-size:11px;color:var(--green);font-weight:600;flex-shrink:0}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#1C1B18;color:#fff;font-size:13px;font-family:'Noto Sans KR',sans-serif;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:all 0.25s;z-index:9999;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#1C1B18;color:#fff;font-size:13px;font-family:'Noto Sans KR',sans-serif;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:all 0.25s;z-index:9999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.divider{height:0.5px;background:var(--border-light);margin:14px 0}
-
-/* 가이드 박스 */
-#guideBox{display:none;margin-top:16px;background:#F7F6F2;border-radius:10px;padding:14px;font-size:12px;line-height:1.9;color:var(--text)}
-#guideBox code{background:#e8e6e0;padding:2px 5px;border-radius:3px;font-family:Consolas,monospace;font-size:11px}
-
-@media(max-width:500px){
-  .grid{grid-template-columns:1fr}
-  .field.full{grid-column:1}
-  .action-bar{grid-template-columns:1fr}
-}
+@media(max-width:500px){.grid{grid-template-columns:1fr}.field.full{grid-column:1}.action-bar{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-icon">상지</div>
-      <div>
-        <div class="brand-name">수발신 문서 기록</div>
-        <div class="brand-sub">상지서울 프로젝트 히스토리 관리</div>
-      </div>
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">상지</div>
+    <div>
+      <div class="brand-name">수발신 문서 기록</div>
+      <div class="brand-sub">상지서울 프로젝트 히스토리 관리</div>
     </div>
-    <button class="settings-btn" onclick="toggleSetup()">⚙ API 설정</button>
   </div>
+  <button class="settings-btn" onclick="toggleSetup()">&#9881; API 설정</button>
+</div>
 
-  <!-- API STATUS BADGES -->
-  <div class="api-status">
-    <div class="api-badge"><span class="dot" id="dotDrive"></span><span id="labelDrive">Google Drive</span></div>
-    <div class="api-badge"><span class="dot" id="dotTg"></span>Telegram Bot</div>
+<div class="api-status">
+  <div class="api-badge"><span class="dot" id="dotDrive"></span><span id="labelDrive">Google Drive</span></div>
+  <div class="api-badge"><span class="dot" id="dotTg"></span>Telegram Bot</div>
+</div>
+
+<div class="setup-panel card" id="setupPanel">
+  <div class="setup-desc">입력값은 이 기기의 브라우저에만 저장됩니다. 최초 1회 설정 후 자동 유지됩니다.</div>
+
+  <div class="section-title">Google Drive 연동 (Refresh Token 자동 갱신)</div>
+  <div class="auth-banner none" id="authBanner">
+    <span id="authBannerText">아직 Google 계정 인증이 완료되지 않았습니다.</span>
   </div>
-
-  <!-- ═══════════════════════════════════════════════════
-       SETUP PANEL
-  ════════════════════════════════════════════════════ -->
-  <div class="setup-panel card" id="setupPanel">
-    <div class="setup-title">🔧 API 연동 설정</div>
-    <div class="setup-desc">입력값은 이 기기의 브라우저에만 저장됩니다. 최초 1회만 설정하면 이후 자동으로 유지됩니다.</div>
-
-    <!-- ── Google Drive 섹션 ── -->
-    <div class="setup-section">
-      <div class="setup-section-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 19.5h6.5L12 14l3.5 5.5H22L12 2z" fill="#1a73e8" opacity=".8"/><path d="M2 19.5h20" stroke="#1a73e8" stroke-width="1.5"/></svg>
-        Google Drive 연동 (Refresh Token 방식 — 자동 갱신)
+  <div class="setup-grid">
+    <div class="setup-field">
+      <label>Google Cloud Client ID</label>
+      <div class="setup-row">
+        <input type="text" id="cfgClientId" placeholder="123456789-abc.apps.googleusercontent.com">
       </div>
-
-      <!-- 인증 상태 -->
-      <div class="auth-banner none" id="authBanner">
-        <span>🔒</span><span id="authBannerText">아직 Google 계정 인증이 완료되지 않았습니다.</span>
-      </div>
-
-      <div class="setup-grid">
-        <div class="setup-field">
-          <label>Google Cloud Client ID</label>
-          <div class="setup-row">
-            <input type="text" id="cfgClientId" placeholder="123456789-abc.apps.googleusercontent.com">
-            <div class="status-dot" id="sdClientId"></div>
-          </div>
-          <a class="guide-link" onclick="showGuide('clientid')">📌 Client ID 발급 방법 (최초 1회)</a>
-        </div>
-        <div class="setup-field">
-          <label>Google Cloud Client Secret</label>
-          <div class="setup-row">
-            <input type="password" id="cfgClientSecret" placeholder="GOCSPX-xxxxxxxxxx">
-            <div class="status-dot" id="sdClientSecret"></div>
-          </div>
-        </div>
-        <div class="setup-field">
-          <label>Google Drive 저장 폴더 ID</label>
-          <div class="setup-row">
-            <input type="text" id="cfgFolderId" placeholder="폴더 URL 마지막 ID값">
-            <div class="status-dot" id="sdFolderId"></div>
-          </div>
-          <a class="guide-link" onclick="showGuide('folder')">📌 폴더 ID 확인 방법</a>
-        </div>
-
-        <!-- Refresh Token 저장 (숨김 — 자동 관리) -->
-        <input type="hidden" id="cfgRefreshToken">
-        <input type="hidden" id="cfgAccessToken">
-        <input type="hidden" id="cfgTokenExpiry">
-      </div>
-
-      <!-- Google 인증 버튼 -->
-      <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="oauth-btn" onclick="startGoogleAuth()">
-          <svg class="g-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Google 계정으로 인증하기
-        </button>
-        <button class="save-setup-btn" style="background:#f1efe8;color:var(--text-2);border:0.5px solid var(--border)" onclick="revokeGoogle()">인증 해제</button>
+      <span class="guide-link" onclick="showGuide('clientid')">&#128204; Client ID 발급 방법</span>
+    </div>
+    <div class="setup-field">
+      <label>Google Cloud Client Secret</label>
+      <div class="setup-row">
+        <input type="password" id="cfgClientSecret" placeholder="GOCSPX-xxxxxxxxxx">
       </div>
     </div>
-
-    <div class="divider"></div>
-
-    <!-- ── Telegram 섹션 ── -->
-    <div class="setup-section">
-      <div class="setup-section-title">✈ Telegram Bot 연동</div>
-      <div class="setup-grid">
-        <div class="setup-field">
-          <label>Telegram Bot Token</label>
-          <div class="setup-row">
-            <input type="password" id="cfgBotToken" placeholder="예) 123456789:AAFxxxxxx">
-            <div class="status-dot" id="sdBot"></div>
-          </div>
-          <a class="guide-link" onclick="showGuide('bot')">📌 Bot Token 발급 방법</a>
-        </div>
-        <div class="setup-field">
-          <label>Telegram Chat ID</label>
-          <div class="setup-row">
-            <input type="text" id="cfgChatId" placeholder="예) -1001234567890 또는 @채널명">
-            <div class="status-dot" id="sdChat"></div>
-          </div>
-          <a class="guide-link" onclick="showGuide('chat')">📌 Chat ID 확인 방법</a>
-        </div>
+    <div class="setup-field">
+      <label>Google Drive 저장 폴더 ID</label>
+      <div class="setup-row">
+        <input type="text" id="cfgFolderId" placeholder="폴더 URL 마지막 ID값">
       </div>
-    </div>
-
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="save-setup-btn" onclick="saveSetup()">✓ 설정 저장</button>
-      <button class="save-setup-btn" style="background:#f1efe8;color:var(--text-2);border:0.5px solid var(--border)" onclick="testTelegram()">텔레그램 테스트 발송</button>
-    </div>
-
-    <div id="guideBox"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════
-       FORM
-  ════════════════════════════════════════════════════ -->
-
-  <!-- 기본 정보 -->
-  <div class="card">
-    <div class="sec-label">기본 정보</div>
-    <div class="grid">
-      <div class="field">
-        <label>날짜 *</label>
-        <input type="date" id="date">
-      </div>
-      <div class="field">
-        <label>수·발신 구분 *</label>
-        <select id="direction">
-          <option value="수신">수신 (받음)</option>
-          <option value="발신">발신 (보냄)</option>
-          <option value="내부">내부</option>
-        </select>
-      </div>
-      <div class="field full">
-        <label>프로젝트명 *</label>
-        <input type="text" id="project" placeholder="프로젝트명 입력">
-      </div>
-      <div class="field full">
-        <label>문서번호</label>
-        <div class="docnum-row">
-          <input type="text" id="docnum" placeholder="예) SJS-202605-001">
-          <button class="auto-btn" onclick="autoNum()">자동생성</button>
-        </div>
-      </div>
-      <div class="field full">
-        <label>제목 *</label>
-        <input type="text" id="title" placeholder="문서 제목 입력">
-      </div>
-      <div class="field full">
-        <label>문서 유형</label>
-        <div class="type-wrap" id="typeWrap">
-          <div class="type-btn on" onclick="pickType(this)">공문</div>
-          <div class="type-btn" onclick="pickType(this)">계약서</div>
-          <div class="type-btn" onclick="pickType(this)">견적서</div>
-          <div class="type-btn" onclick="pickType(this)">수발신 메일</div>
-          <div class="type-btn" onclick="pickType(this)">회의록</div>
-          <div class="type-btn" onclick="pickType(this)">협의사항</div>
-          <div class="type-btn" onclick="pickType(this)">녹취자료</div>
-          <div class="type-btn" onclick="pickType(this)">기타</div>
-        </div>
-      </div>
+      <span class="guide-link" onclick="showGuide('folder')">&#128204; 폴더 ID 확인 방법</span>
     </div>
   </div>
 
-  <!-- 참여자 -->
-  <div class="card">
-    <div class="sec-label">참여자 정보</div>
-    <div class="grid">
-      <div class="field">
-        <label>담당자</label>
-        <input type="text" id="manager" placeholder="내부 담당자">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+    <button class="oauth-btn" onclick="startGoogleAuth()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Google 계정으로 인증하기
+    </button>
+    <button class="save-btn ghost" onclick="revokeGoogle()">인증 해제</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title">Telegram Bot 연동</div>
+  <div class="setup-grid">
+    <div class="setup-field">
+      <label>Telegram Bot Token</label>
+      <input type="password" id="cfgBotToken" placeholder="예) 123456789:AAFxxxxxx">
+      <span class="guide-link" onclick="showGuide('bot')">&#128204; Bot Token 발급 방법</span>
+    </div>
+    <div class="setup-field">
+      <label>Telegram Chat ID</label>
+      <input type="text" id="cfgChatId" placeholder="예) -1001234567890 또는 @채널명">
+      <span class="guide-link" onclick="showGuide('chat')">&#128204; Chat ID 확인 방법</span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+    <button class="save-btn" onclick="saveSetup()">&#10003; 설정 저장</button>
+    <button class="save-btn ghost" onclick="testTelegram()">텔레그램 테스트 발송</button>
+  </div>
+
+  <div class="guide-box" id="guideBox"></div>
+</div>
+
+<div class="card">
+  <div class="sec-label">기본 정보</div>
+  <div class="grid">
+    <div class="field"><label>날짜 *</label><input type="date" id="date"></div>
+    <div class="field"><label>수발신 구분 *</label>
+      <select id="direction">
+        <option value="수신">수신 (받음)</option>
+        <option value="발신">발신 (보냄)</option>
+        <option value="내부">내부</option>
+      </select>
+    </div>
+    <div class="field full"><label>프로젝트명 *</label><input type="text" id="project" placeholder="프로젝트명 입력"></div>
+    <div class="field full"><label>문서번호</label>
+      <div class="docnum-row">
+        <input type="text" id="docnum" placeholder="예) SJS-202605-001">
+        <button class="auto-btn" onclick="autoNum()">자동생성</button>
       </div>
-      <div class="field">
-        <label>상대방 / 기관</label>
-        <input type="text" id="counterpart" placeholder="발신처 또는 수신처">
+    </div>
+    <div class="field full"><label>제목 *</label><input type="text" id="title" placeholder="문서 제목 입력"></div>
+    <div class="field full"><label>문서 유형</label>
+      <div class="type-wrap">
+        <div class="type-btn on" onclick="pickType(this)">공문</div>
+        <div class="type-btn" onclick="pickType(this)">계약서</div>
+        <div class="type-btn" onclick="pickType(this)">견적서</div>
+        <div class="type-btn" onclick="pickType(this)">수발신 메일</div>
+        <div class="type-btn" onclick="pickType(this)">회의록</div>
+        <div class="type-btn" onclick="pickType(this)">협의사항</div>
+        <div class="type-btn" onclick="pickType(this)">녹취자료</div>
+        <div class="type-btn" onclick="pickType(this)">기타</div>
       </div>
-      <div class="field full">
-        <label>참석자</label>
-        <div class="attendee-row">
-          <input type="text" id="attInput" placeholder="이름 또는 소속 입력 후 추가" onkeydown="if(event.key==='Enter'){event.preventDefault();addAtt()}">
-          <button class="add-btn" onclick="addAtt()">+ 추가</button>
-        </div>
-        <div class="tags" id="attTags"></div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="sec-label">참여자 정보</div>
+  <div class="grid">
+    <div class="field"><label>담당자</label><input type="text" id="manager" placeholder="내부 담당자"></div>
+    <div class="field"><label>상대방 / 기관</label><input type="text" id="counterpart" placeholder="발신처 또는 수신처"></div>
+    <div class="field full"><label>참석자</label>
+      <div class="att-row">
+        <input type="text" id="attInput" placeholder="이름 또는 소속 입력 후 추가" onkeydown="if(event.key==='Enter'){event.preventDefault();addAtt()}">
+        <button class="add-btn" onclick="addAtt()">+ 추가</button>
       </div>
+      <div class="tags" id="attTags"></div>
     </div>
   </div>
+</div>
 
-  <!-- 내용 -->
-  <div class="card">
-    <div class="sec-label">주요 내용</div>
-    <div class="field">
-      <label>협의사항 / 특이사항</label>
-      <textarea id="memo" placeholder="핵심 내용, 결정사항, 특이사항 등을 기록"></textarea>
-      <div class="char-count" id="charCount">0자</div>
-    </div>
-    <div class="divider"></div>
-    <div class="field">
-      <label>Google Drive 링크 또는 NAS 경로 (직접 입력 시)</label>
-      <input type="text" id="manualLink" placeholder="https://drive.google.com/... 또는 \\NAS\경로\...">
-    </div>
+<div class="card">
+  <div class="sec-label">주요 내용</div>
+  <div class="field">
+    <label>협의사항 / 특이사항</label>
+    <textarea id="memo" placeholder="핵심 내용, 결정사항, 특이사항 등을 기록"></textarea>
+    <div class="char-count" id="charCount">0자</div>
   </div>
+  <div class="divider"></div>
+  <div class="field">
+    <label>Google Drive 링크 또는 NAS 경로</label>
+    <input type="text" id="manualLink" placeholder="https://drive.google.com/... 또는 \\NAS\경로\...">
+  </div>
+</div>
 
-  <!-- 파일 첨부 -->
-  <div class="card">
-    <div class="sec-label">첨부 파일</div>
-    <div class="file-drop-zone" id="dropZone">
-      <input type="file" id="fileInput" multiple accept="*/*" onchange="handleFileSelect(this.files)">
-      <div class="drop-icon">📎</div>
-      <div class="drop-text">파일을 여기에 드래그하거나 클릭하여 추가</div>
-      <div class="drop-sub">모든 형식 지원 · 여러 파일 동시 선택 · 계속 추가 가능</div>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="add-btn" style="font-size:12px" onclick="document.getElementById('fileInput2').click()">+ 파일 추가</button>
-      <input type="file" id="fileInput2" multiple accept="*/*" style="display:none" onchange="handleFileSelect(this.files)">
-      <span id="fileSummary" style="font-size:12px;color:var(--text-3)">첨부된 파일 없음</span>
-      <button id="clearFilesBtn" class="add-btn" style="font-size:12px;color:var(--red);border-color:#f09595;display:none;margin-left:auto" onclick="clearAllFiles()">전체 삭제</button>
-    </div>
-    <div class="file-list" id="fileList"></div>
+<div class="card">
+  <div class="sec-label">첨부 파일</div>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" multiple onchange="handleFiles(this.files)">
+    <div style="font-size:28px">&#128206;</div>
+    <div class="drop-text">파일을 여기에 드래그하거나 클릭하여 추가</div>
+    <div class="drop-sub">모든 형식 지원 &middot; 여러 파일 동시 선택 &middot; 계속 추가 가능</div>
   </div>
+  <div class="file-bar">
+    <button class="add-btn" style="font-size:12px" onclick="document.getElementById('fileInput2').click()">+ 파일 추가</button>
+    <input type="file" id="fileInput2" multiple style="display:none" onchange="handleFiles(this.files)">
+    <span id="fileSummary" style="font-size:12px;color:var(--text-3)">첨부된 파일 없음</span>
+    <button id="clearFilesBtn" class="add-btn" style="font-size:12px;color:var(--red);border-color:#f09595;display:none;margin-left:auto" onclick="clearFiles()">전체 삭제</button>
+  </div>
+  <div class="file-list" id="fileList"></div>
+</div>
 
-  <!-- 출력 -->
-  <div class="card">
-    <div class="sec-label">생성된 기록</div>
-    <div class="output-box empty" id="output">위 항목을 입력한 뒤 [저장 + 발송] 버튼을 누르세요.</div>
-    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="log-wrap" id="logWrap"></div>
-    <div class="action-bar">
-      <button class="btn primary main-btn" id="mainBtn" onclick="submitAll()">💾 저장 + Drive 업로드 + 텔레그램 발송</button>
-      <button class="btn tg" onclick="onlyTelegram()">✈ 텔레그램만 발송</button>
-      <button class="btn drive" onclick="openDrive()">▲ Drive 열기</button>
-      <button class="btn ghost" onclick="copyOutput()">📋 텍스트 복사</button>
-      <button class="btn ghost" onclick="resetAll()">↺ 초기화</button>
-    </div>
+<div class="card">
+  <div class="sec-label">생성된 기록</div>
+  <div class="output-box empty" id="output">위 항목을 입력한 뒤 [저장 + 발송] 버튼을 누르세요.</div>
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="log-wrap" id="logWrap"></div>
+  <div class="action-bar">
+    <button class="btn primary main-btn" id="mainBtn" onclick="submitAll()">&#128190; 저장 + Drive 업로드 + 텔레그램 발송</button>
+    <button class="btn tg" onclick="onlyTelegram()">&#9992; 텔레그램만 발송</button>
+    <button class="btn drive" onclick="openDrive()">Drive 열기</button>
+    <button class="btn ghost" onclick="copyOutput()">&#128203; 텍스트 복사</button>
+    <button class="btn ghost" onclick="resetAll()">&#8635; 초기화</button>
   </div>
+</div>
 
-  <!-- 최근 기록 -->
-  <div class="card" id="recentCard" style="display:none">
-    <div class="recent-header">
-      <div class="sec-label" style="margin:0">최근 기록</div>
-      <button class="btn ghost" style="width:auto;padding:5px 12px;font-size:12px" onclick="clearHistory()">전체 삭제</button>
-    </div>
-    <div id="recentList"></div>
+<div class="card" id="recentCard" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div class="sec-label" style="margin:0">최근 기록</div>
+    <button class="btn ghost" style="width:auto;padding:5px 12px;font-size:12px" onclick="clearHistory()">전체 삭제</button>
   </div>
+  <div id="recentList"></div>
+</div>
 
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     JAVASCRIPT
-════════════════════════════════════════════════════════════ -->
 <script>
-// --- 상수 --------------------------------------------------------------------
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-const TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink';
+var TOKEN_URL = 'https://oauth2.googleapis.com/token';
+var DRIVE_URL = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink';
+var SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
-const TYPE_COLORS = {
+var TYPE_COLORS = {
   '공문':'#1A9E74','계약서':'#185FA5','견적서':'#BA7517',
   '수발신 메일':'#993556','회의록':'#534AB7','협의사항':'#5A8F22',
   '녹취자료':'#993C1D','기타':'#888780','내부':'#888780'
 };
 
-function fileIcon(name) {
-  const ext = (name.split('.').pop() || '').toLowerCase();
-  const map = {
-    pdf:'pdf', doc:'doc', docx:'doc', xls:'xls', xlsx:'xls', ppt:'ppt', pptx:'ppt',
-    hwp:'hwp', hwpx:'hwp', jpg:'img', jpeg:'img', png:'img', gif:'img', webp:'img',
-    svg:'img', bmp:'img', tiff:'img', mp4:'vid', mov:'vid', avi:'vid', mkv:'vid',
-    mp3:'aud', wav:'aud', aac:'aud', flac:'aud', zip:'zip', rar:'zip', '7z':'zip',
-    txt:'txt', md:'txt', csv:'dat', json:'dat', xml:'dat',
-    dwg:'cad', dxf:'cad', rvt:'cad', ifc:'cad', psd:'art', ai:'art',
-  };
-  return map[ext] || 'fil';
+var FILE_ICONS = {
+  pdf:'[PDF]', doc:'[DOC]', docx:'[DOC]', xls:'[XLS]', xlsx:'[XLS]',
+  ppt:'[PPT]', pptx:'[PPT]', hwp:'[HWP]', hwpx:'[HWP]',
+  jpg:'[IMG]', jpeg:'[IMG]', png:'[IMG]', gif:'[IMG]', webp:'[IMG]',
+  svg:'[IMG]', bmp:'[IMG]', tiff:'[IMG]',
+  mp4:'[VID]', mov:'[VID]', avi:'[VID]', mkv:'[VID]',
+  mp3:'[AUD]', wav:'[AUD]', aac:'[AUD]', flac:'[AUD]',
+  zip:'[ZIP]', rar:'[ZIP]', gz:'[ZIP]',
+  txt:'[TXT]', md:'[TXT]', csv:'[CSV]', json:'[JSON]',
+  dwg:'[CAD]', dxf:'[CAD]', rvt:'[CAD]', ifc:'[CAD]',
+  psd:'[PSD]', ai:'[AI]'
+};
+
+function getIcon(name) {
+  var ext = (name.split('.').pop() || '').toLowerCase();
+  return FILE_ICONS[ext] || '[FILE]';
 }
+
 function fmtSize(b) {
   if (b < 1024) return b + 'B';
-  if (b < 1048576) return (b / 1024).toFixed(1) + 'KB';
-  return (b / 1048576).toFixed(1) + 'MB';
+  if (b < 1048576) return (b/1024).toFixed(1) + 'KB';
+  return (b/1048576).toFixed(1) + 'MB';
 }
 
-// --- STATE -------------------------------------------------------------------
-let selType = '공문';
-let attendees = [];
-let history = [];
-let attachedFiles = [];
-let fileIdCounter = 0;
-let cfg = { clientId:'', clientSecret:'', folderId:'', refreshToken:'', accessToken:'', tokenExpiry:0, botToken:'', chatId:'' };
+var selType = '공문';
+var attendees = [];
+var history = [];
+var attachedFiles = [];
+var fileIdCnt = 0;
+var cfg = {clientId:'',clientSecret:'',folderId:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
 
-// --- INIT --------------------------------------------------------------------
+function toggleSetup() {
+  document.getElementById('setupPanel').classList.toggle('open');
+}
+
 function init() {
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
   document.getElementById('memo').addEventListener('input', function() {
@@ -487,14 +375,13 @@ function init() {
   loadCfg();
   loadHistory();
   setupDrop();
-  checkOAuthCallback(); // URL에 code 파라미터 있으면 처리
+  checkOAuthCallback();
 }
 
-// --- CONFIG 저장/로드 ---------------------------------------------------------
 function loadCfg() {
   try {
-    const s = localStorage.getItem('sjs_cfg_v4');
-    if (s) cfg = { ...cfg, ...JSON.parse(s) };
+    var s = localStorage.getItem('sjs_cfg_v4');
+    if (s) cfg = Object.assign(cfg, JSON.parse(s));
   } catch(e) {}
   document.getElementById('cfgClientId').value = cfg.clientId || '';
   document.getElementById('cfgClientSecret').value = cfg.clientSecret || '';
@@ -502,532 +389,507 @@ function loadCfg() {
   document.getElementById('cfgBotToken').value = cfg.botToken || '';
   document.getElementById('cfgChatId').value = cfg.chatId || '';
   updateBadges();
-  updateAuthBanner();
+  updateBanner();
 }
+
 function saveCfg() {
   try { localStorage.setItem('sjs_cfg_v4', JSON.stringify(cfg)); } catch(e) {}
 }
+
 function saveSetup() {
-  cfg.clientId = v('cfgClientId');
-  cfg.clientSecret = v('cfgClientSecret');
-  cfg.folderId = v('cfgFolderId');
-  cfg.botToken = v('cfgBotToken');
-  cfg.chatId = v('cfgChatId');
+  cfg.clientId = document.getElementById('cfgClientId').value.trim();
+  cfg.clientSecret = document.getElementById('cfgClientSecret').value.trim();
+  cfg.folderId = document.getElementById('cfgFolderId').value.trim();
+  cfg.botToken = document.getElementById('cfgBotToken').value.trim();
+  cfg.chatId = document.getElementById('cfgChatId').value.trim();
   saveCfg();
   updateBadges();
-  updateAuthBanner();
+  updateBanner();
   showToast('설정이 저장됐습니다');
   document.getElementById('setupPanel').classList.remove('open');
 }
 
-// --- BADGES & BANNER ---------------------------------------------------------
 function updateBadges() {
-  const hasDrive = !!(cfg.refreshToken && cfg.folderId);
-  const hasTg = !!(cfg.botToken && cfg.chatId);
-  document.getElementById('dotDrive').className = 'dot ' + (hasDrive ? 'ok' : 'none');
-  document.getElementById('labelDrive').textContent = hasDrive ? 'Google Drive - 자동갱신' : 'Google Drive';
-  document.getElementById('dotTg').className = 'dot ' + (hasTg ? 'ok' : 'none');
+  var hasDrive = !!(cfg.refreshToken && cfg.folderId);
+  var hasTg = !!(cfg.botToken && cfg.chatId);
+  document.getElementById('dotDrive').className = 'dot ' + (hasDrive ? 'ok' : '');
+  document.getElementById('labelDrive').textContent = hasDrive ? 'Google Drive (자동갱신)' : 'Google Drive';
+  document.getElementById('dotTg').className = 'dot ' + (hasTg ? 'ok' : '');
 }
-function updateAuthBanner() {
-  const banner = document.getElementById('authBanner');
-  const text = document.getElementById('authBannerText');
+
+function updateBanner() {
+  var banner = document.getElementById('authBanner');
+  var text = document.getElementById('authBannerText');
   if (cfg.refreshToken) {
     banner.className = 'auth-banner ok';
     text.textContent = 'Google 계정 인증 완료 - Access Token이 만료되면 자동으로 갱신됩니다.';
   } else if (cfg.clientId && cfg.clientSecret) {
     banner.className = 'auth-banner warn';
-    text.textContent = 'Client ID / Secret이 입력됐습니다. 아래 [Google 계정으로 인증하기] 버튼을 눌러 인증을 완료하세요.';
+    text.textContent = 'Client ID/Secret이 입력됐습니다. 아래 [Google 계정으로 인증하기] 버튼을 눌러 인증을 완료하세요.';
   } else {
     banner.className = 'auth-banner none';
-    text.textContent = '아직 Google 계정 인증이 완료되지 않았습니다. 아래 절차대로 설정하세요.';
+    text.textContent = '아직 Google 계정 인증이 완료되지 않았습니다.';
   }
 }
 
-// --- GOOGLE OAUTH 2.0 --------------------------------------------------------
-// 인증 시작: Google 로그인 페이지로 이동
+var GUIDES = {
+  clientid: '<b>Google Cloud Client ID/Secret 발급</b><br><br>1. console.cloud.google.com 접속<br>2. 새 프로젝트 생성<br>3. Google Drive API 활성화<br>4. OAuth 동의 화면 설정 (외부 선택)<br>5. 사용자 인증 정보 > OAuth 클라이언트 ID 만들기<br>6. 웹 애플리케이션 선택<br>7. 승인된 리디렉션 URI에 이 페이지 URL 추가<br>8. 클라이언트 ID와 Secret 복사',
+  folder: '<b>Google Drive 폴더 ID 확인</b><br><br>1. drive.google.com 접속<br>2. 저장할 폴더 열기<br>3. 주소창 URL 확인:<br>https://drive.google.com/drive/folders/<b>[여기가 폴더 ID]</b><br>4. /folders/ 뒤 문자열 복사',
+  bot: '<b>Telegram Bot Token 발급</b><br><br>1. 텔레그램에서 @BotFather 검색<br>2. /newbot 입력<br>3. 봇 이름 및 username 입력 (username은 bot으로 끝나야 함)<br>4. 발급된 Token 복사<br>5. 봇을 채널/그룹 관리자로 초대',
+  chat: '<b>Telegram Chat ID 확인</b><br><br>1. 봇을 채널 관리자로 초대 후 채널에 메시지 발송<br>2. 아래 URL 접속 (봇 토큰 교체):<br>https://api.telegram.org/bot[봇토큰]/getUpdates<br>3. "chat" > "id" 값 확인<br>- 비공개 채널: -100으로 시작하는 숫자 (마이너스 포함)<br>- 공개 채널: @채널명 형태로 입력 가능<br><br>* Chat ID에 마이너스가 없다면 봇을 채널 관리자로 재초대 후 재시도'
+};
+
+function showGuide(key) {
+  var box = document.getElementById('guideBox');
+  if (box.style.display === 'none' || box.style.display === '' || box.dataset.key !== key) {
+    box.innerHTML = GUIDES[key];
+    box.style.display = 'block';
+    box.dataset.key = key;
+  } else {
+    box.style.display = 'none';
+  }
+}
+
 function startGoogleAuth() {
-  const clientId = document.getElementById('cfgClientId').value.trim();
-  const clientSecret = document.getElementById('cfgClientSecret').value.trim();
+  var clientId = document.getElementById('cfgClientId').value.trim();
+  var clientSecret = document.getElementById('cfgClientSecret').value.trim();
   if (!clientId || !clientSecret) {
     showToast('Client ID와 Client Secret을 먼저 입력하고 저장하세요');
     return;
   }
-  // 설정 임시 저장
   cfg.clientId = clientId;
   cfg.clientSecret = clientSecret;
   cfg.folderId = document.getElementById('cfgFolderId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
   saveCfg();
-
-  const redirectUri = encodeURIComponent(window.location.href.split('?')[0]);
-  const url = `https://accounts.google.com/o/oauth2/v2/auth`
-    + `?client_id=${encodeURIComponent(clientId)}`
-    + `&redirect_uri=${redirectUri}`
-    + `&response_type=code`
-    + `&scope=${encodeURIComponent(SCOPES)}`
-    + `&access_type=offline`      // Refresh Token 발급을 위해 필수
-    + `&prompt=consent`;          // 항상 Refresh Token 재발급
+  var redirectUri = encodeURIComponent(window.location.href.split('?')[0]);
+  var url = 'https://accounts.google.com/o/oauth2/v2/auth'
+    + '?client_id=' + encodeURIComponent(clientId)
+    + '&redirect_uri=' + redirectUri
+    + '&response_type=code'
+    + '&scope=' + encodeURIComponent(SCOPE)
+    + '&access_type=offline'
+    + '&prompt=consent';
   window.location.href = url;
 }
 
-// 인증 콜백: URL에 ?code=... 가 있으면 처리
-async function checkOAuthCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
+function checkOAuthCallback() {
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
   if (!code) return;
-
-  // URL에서 code 제거 (새로고침 시 재처리 방지)
   window.history.replaceState({}, document.title, window.location.pathname);
-
-  addLog('info', '-', 'Google 인증 코드 수신 - Access Token 교환 중...');
   document.getElementById('setupPanel').classList.add('open');
-
-  try {
-    const redirectUri = window.location.href.split('?')[0];
-    const res = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: cfg.clientId,
-        client_secret: cfg.clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code'
-      })
-    });
-    const data = await res.json();
+  addLog('info', 'Google 인증 코드 수신 - Token 교환 중...');
+  var redirectUri = window.location.href.split('?')[0];
+  fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      code: code,
+      client_id: cfg.clientId,
+      client_secret: cfg.clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code'
+    })
+  }).then(function(res) { return res.json(); }).then(function(data) {
     if (data.refresh_token) {
       cfg.refreshToken = data.refresh_token;
       cfg.accessToken = data.access_token;
       cfg.tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
       saveCfg();
       updateBadges();
-      updateAuthBanner();
-      addLog('ok', '-', 'Google Drive 인증 완료! 이제 Access Token이 자동으로 갱신됩니다.');
+      updateBanner();
+      addLog('ok', 'Google Drive 인증 완료! Access Token이 자동으로 갱신됩니다.');
       showToast('Google Drive 인증 성공!');
     } else {
-      addLog('err', '-', '인증 실패: ' + (data.error_description || JSON.stringify(data)));
+      addLog('err', '인증 실패: ' + (data.error_description || JSON.stringify(data)));
     }
-  } catch(e) {
-    addLog('err', '-', '인증 처리 오류: ' + e.message);
-  }
+  }).catch(function(e) {
+    addLog('err', '인증 오류: ' + e.message);
+  });
 }
 
-// Access Token 자동 갱신
-async function getValidAccessToken() {
-  if (!cfg.refreshToken) return null;
-  // 토큰이 아직 유효하면 재사용
-  if (cfg.accessToken && Date.now() < cfg.tokenExpiry) {
-    return cfg.accessToken;
-  }
-  // 만료됐거나 없으면 Refresh Token으로 새 토큰 발급
-  addLog('info', '-', 'Access Token 자동 갱신 중...');
-  try {
-    const res = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: cfg.clientId,
-        client_secret: cfg.clientSecret,
-        refresh_token: cfg.refreshToken,
-        grant_type: 'refresh_token'
-      })
-    });
-    const data = await res.json();
+function getAccessToken() {
+  if (!cfg.refreshToken) return Promise.resolve(null);
+  if (cfg.accessToken && Date.now() < cfg.tokenExpiry) return Promise.resolve(cfg.accessToken);
+  addLog('info', 'Access Token 자동 갱신 중...');
+  return fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
+      client_id: cfg.clientId,
+      client_secret: cfg.clientSecret,
+      refresh_token: cfg.refreshToken,
+      grant_type: 'refresh_token'
+    })
+  }).then(function(res) { return res.json(); }).then(function(data) {
     if (data.access_token) {
       cfg.accessToken = data.access_token;
       cfg.tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
       saveCfg();
-      addLog('ok', '-', 'Access Token 자동 갱신 완료');
+      addLog('ok', 'Access Token 갱신 완료');
       return cfg.accessToken;
-    } else {
-      addLog('err', '-', '토큰 갱신 실패: ' + (data.error_description || JSON.stringify(data)));
-      return null;
     }
-  } catch(e) {
-    addLog('err', '-', '토큰 갱신 오류: ' + e.message);
+    addLog('err', '토큰 갱신 실패: ' + (data.error_description || ''));
     return null;
-  }
+  }).catch(function(e) {
+    addLog('err', '토큰 갱신 오류: ' + e.message);
+    return null;
+  });
 }
 
 function revokeGoogle() {
-  if (!confirm('Google 인증을 해제하면 Drive 업로드가 중단됩니다. 계속할까요?')) return;
-  cfg.refreshToken = '';
-  cfg.accessToken = '';
-  cfg.tokenExpiry = 0;
-  saveCfg();
-  updateBadges();
-  updateAuthBanner();
+  if (!confirm('Google 인증을 해제할까요?')) return;
+  cfg.refreshToken = ''; cfg.accessToken = ''; cfg.tokenExpiry = 0;
+  saveCfg(); updateBadges(); updateBanner();
   showToast('Google 인증이 해제됐습니다');
 }
 
-// --- SETUP GUIDES -------------------------------------------------------------
-const GUIDES = {
-  clientid: `<b>- Google Cloud Client ID / Secret 발급 방법 (최초 1회)</b><br><br>
-<b>1단계: Google Cloud 프로젝트 생성</b><br>
-1. <a href="https://console.cloud.google.com" target="_blank" style="color:#1A9E74">console.cloud.google.com</a> 접속 - Google 계정 로그인<br>
-2. 상단 프로젝트 선택 - <b>[새 프로젝트]</b> - 이름 입력 (예: 상지서울문서관리) - 만들기<br><br>
-<b>2단계: Google Drive API 활성화</b><br>
-3. 좌측 메뉴 - <b>API 및 서비스</b> - <b>라이브러리</b><br>
-4. "Google Drive API" 검색 - 클릭 - <b>[사용 설정]</b><br><br>
-<b>3단계: OAuth 동의 화면 설정</b><br>
-5. 좌측 메뉴 - <b>OAuth 동의 화면</b> - 사용자 유형: <b>외부</b> 선택 - 만들기<br>
-6. 앱 이름 입력 (예: 상지서울) - 지원 이메일 선택 - <b>[저장 후 계속]</b><br>
-7. 범위 추가: <code>.../auth/drive.file</code> 추가 - 저장 후 계속<br>
-8. 테스트 사용자 추가: 사용할 Google 계정 이메일 입력 - 저장<br><br>
-<b>4단계: OAuth 2.0 Client ID 생성</b><br>
-9. 좌측 메뉴 - <b>사용자 인증 정보</b> - <b>[사용자 인증 정보 만들기]</b> - OAuth 클라이언트 ID<br>
-10. 애플리케이션 유형: <b>웹 애플리케이션</b> 선택<br>
-11. <b>승인된 리디렉션 URI</b>에 이 파일의 주소 추가:<br>
-<code>file:///C:/Users/.../sjs_doc_logger_v4.html</code> (파일을 브라우저에서 열었을 때의 URL)<br>
-- 로컬 파일인 경우 <code>http://localhost</code>를 추가하거나, 파일을 웹서버에 올리는 것을 권장<br>
-12. 만들기 - <b>클라이언트 ID</b>와 <b>클라이언트 보안 비밀번호</b> 복사 - 위 입력란에 붙여넣기`,
-
-  folder: `<b>- Google Drive 폴더 ID 확인 방법</b><br>
-1. Google Drive에서 저장할 폴더 열기<br>
-2. 브라우저 주소창 URL 확인:<br>
-<code>https://drive.google.com/drive/folders/<b>[여기가 폴더 ID]</b></code><br>
-3. <b>/folders/</b> 뒤의 문자열 전체 복사`,
-
-  bot: `<b>- Telegram Bot Token 발급 방법</b><br>
-1. 텔레그램에서 <b>@BotFather</b> 검색 - 대화 시작<br>
-2. <code>/newbot</code> 입력<br>
-3. 봇 이름 및 username 입력 (username은 반드시 bot으로 끝나야 함)<br>
-4. 발급된 <b>HTTP API Token</b> 복사<br>
-5. 만든 봇을 알림 받을 채널/그룹에 <b>관리자로 초대</b>`,
-
-  chat: `<b>- Telegram Chat ID 확인 방법</b><br>
-- 공개 채널: <code>@채널명</code> 형태로 입력 가능<br>
-- 비공개 채널/그룹 ID 확인:<br>
-1. 봇을 채널 관리자로 초대 후 채널에 메시지 발송<br>
-2. 브라우저에서 아래 URL 접속 (봇 토큰 교체):<br>
-<code>https://api.telegram.org/bot[봇토큰]/getUpdates</code><br>
-3. JSON에서 <b>"chat" - "id"</b> 값 확인<br>
-- 비공개 채널 ID는 반드시 <b>-100으로 시작하는 숫자</b>여야 합니다.<br>
-마이너스(-)가 없다면 봇이 채널 관리자로 초대되지 않은 것 - 재초대 후 재시도`
-};
-
-function showGuide(key) {
-  const box = document.getElementById('guideBox');
-  if (box.style.display === 'none' || box.innerHTML !== GUIDES[key]) {
-    box.innerHTML = GUIDES[key]; box.style.display = 'block';
-  } else { box.style.display = 'none'; }
-}
-
-// --- DRAG & DROP -------------------------------------------------------------
 function setupDrop() {
-  const zone = document.getElementById('dropZone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-  zone.addEventListener('drop', e => {
+  var zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+  zone.addEventListener('drop', function(e) {
     e.preventDefault(); zone.classList.remove('dragover');
-    handleFileSelect(e.dataTransfer.files);
+    handleFiles(e.dataTransfer.files);
   });
 }
 
-// --- FILE HANDLING ------------------------------------------------------------
-function handleFileSelect(files) {
+function handleFiles(files) {
   if (!files || !files.length) return;
-  Array.from(files).forEach(file => {
-    if (attachedFiles.some(af => af.file.name === file.name && af.file.size === file.size)) {
-      showToast(`"${file.name}"은 이미 추가됐습니다`); return;
-    }
-    attachedFiles.push({ file, id: ++fileIdCounter, status: 'pending', driveLink: null });
-  });
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var dup = attachedFiles.some(function(af) { return af.file.name === file.name && af.file.size === file.size; });
+    if (dup) { showToast('"' + file.name + '"은 이미 추가됐습니다'); continue; }
+    attachedFiles.push({file:file, id:++fileIdCnt, status:'pending', driveLink:null});
+  }
   document.getElementById('fileInput').value = '';
   document.getElementById('fileInput2').value = '';
-  renderFileList();
+  renderFiles();
 }
-function removeFile(id) { attachedFiles = attachedFiles.filter(f => f.id !== id); renderFileList(); }
-function clearAllFiles() { attachedFiles = []; renderFileList(); }
-function renderFileList() {
-  const list = document.getElementById('fileList');
-  const summary = document.getElementById('fileSummary');
-  const clearBtn = document.getElementById('clearFilesBtn');
+
+function removeFile(id) {
+  attachedFiles = attachedFiles.filter(function(f) { return f.id !== id; });
+  renderFiles();
+}
+
+function clearFiles() { attachedFiles = []; renderFiles(); }
+
+function renderFiles() {
+  var list = document.getElementById('fileList');
+  var summary = document.getElementById('fileSummary');
+  var clearBtn = document.getElementById('clearFilesBtn');
   if (!attachedFiles.length) {
     list.innerHTML = ''; summary.textContent = '첨부된 파일 없음'; clearBtn.style.display = 'none'; return;
   }
-  const total = attachedFiles.reduce((s, f) => s + f.file.size, 0);
-  summary.textContent = `${attachedFiles.length}개 파일 - 총 ${fmtSize(total)}`;
+  var total = attachedFiles.reduce(function(s,f) { return s + f.file.size; }, 0);
+  summary.textContent = attachedFiles.length + '개 파일 / 총 ' + fmtSize(total);
   clearBtn.style.display = 'inline-flex';
-  list.innerHTML = attachedFiles.map(af => {
-    const statusLabel = { pending:'대기', uploading:'업로드 중', done:'완료', error:'오류' }[af.status];
-    const linkHtml = af.driveLink ? `<a class="file-link" href="${af.driveLink}" target="_blank">- Drive에서 열기</a>` : '';
-    return `<div class="file-item" id="fi-${af.id}">
-      <span class="file-icon">${fileIcon(af.file.name)}</span>
-      <div class="file-info">
-        <div class="file-name" title="${af.file.name}">${af.file.name}</div>
-        <div class="file-size">${fmtSize(af.file.size)} - ${af.file.type || '알 수 없는 형식'}${linkHtml}</div>
-      </div>
-      <span class="file-status ${af.status}">${statusLabel}</span>
-      <span class="file-del" onclick="removeFile(${af.id})" title="삭제">-</span>
-    </div>`;
+  list.innerHTML = attachedFiles.map(function(af) {
+    var statusLabel = {pending:'대기',uploading:'업로드중',done:'완료',error:'오류'}[af.status];
+    var linkHtml = af.driveLink ? '<a class="file-link" href="' + af.driveLink + '" target="_blank">Drive에서 열기</a>' : '';
+    return '<div class="file-item" id="fi-' + af.id + '">'
+      + '<span style="flex-shrink:0;font-size:12px;color:#888">' + getIcon(af.file.name) + '</span>'
+      + '<div class="file-info"><div class="file-name" title="' + af.file.name + '">' + af.file.name + '</div>'
+      + '<div class="file-size">' + fmtSize(af.file.size) + linkHtml + '</div></div>'
+      + '<span class="file-status ' + af.status + '">' + statusLabel + '</span>'
+      + '<span class="file-del" onclick="removeFile(' + af.id + ')">&#215;</span>'
+      + '</div>';
   }).join('');
 }
-function updateFileStatus(id, status, driveLink = null) {
-  const af = attachedFiles.find(f => f.id === id);
+
+function updateFileStatus(id, status, driveLink) {
+  var af = attachedFiles.find(function(f) { return f.id === id; });
   if (!af) return;
   af.status = status;
   if (driveLink) af.driveLink = driveLink;
-  renderFileList();
+  renderFiles();
 }
 
-// --- FORM ---------------------------------------------------------------------
 function pickType(el) {
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('on'); });
   el.classList.add('on'); selType = el.textContent;
 }
+
 function addAtt() {
-  const inp = document.getElementById('attInput');
-  const val = inp.value.trim(); if (!val) return;
-  if (attendees.includes(val)) { showToast('이미 추가된 참석자입니다'); return; }
+  var inp = document.getElementById('attInput');
+  var val = inp.value.trim(); if (!val) return;
+  if (attendees.indexOf(val) >= 0) { showToast('이미 추가된 참석자입니다'); return; }
   attendees.push(val); inp.value = ''; renderTags(); inp.focus();
 }
-function removeAtt(name) { attendees = attendees.filter(a => a !== name); renderTags(); }
-function renderTags() {
-  document.getElementById('attTags').innerHTML = attendees.map(a =>
-    `<div class="tag"><span>${a}</span><span class="tag-x" onclick="removeAtt('${a.replace(/'/g,"\\'")}')">-</span></div>`
-  ).join('');
-}
-function v(id) { return document.getElementById(id).value.trim(); }
-function autoNum() {
-  const d = v('date').replace(/-/g, '').slice(0, 6) || new Date().toISOString().slice(0, 7).replace('-', '');
-  document.getElementById('docnum').value = `SJS-${d}-${(history.length + 1).toString().padStart(3, '0')}`;
+
+function removeAtt(name) {
+  attendees = attendees.filter(function(a) { return a !== name; }); renderTags();
 }
 
-// --- RECORD BUILDER -----------------------------------------------------------
-function buildRecord(fileLinks = []) {
-  const date = v('date'), title = v('title'), project = v('project');
+function renderTags() {
+  document.getElementById('attTags').innerHTML = attendees.map(function(a) {
+    return '<div class="tag"><span>' + a + '</span><span class="tag-x" onclick="removeAtt(\'' + a.replace(/'/g,"\\'") + '\')">&#215;</span></div>';
+  }).join('');
+}
+
+function gv(id) { return document.getElementById(id).value.trim(); }
+
+function autoNum() {
+  var d = gv('date').replace(/-/g,'').slice(0,6) || new Date().toISOString().slice(0,7).replace('-','');
+  document.getElementById('docnum').value = 'SJS-' + d + '-' + String(history.length+1).padStart(3,'0');
+}
+
+function buildRecord(fileLinks) {
+  fileLinks = fileLinks || [];
+  var date = gv('date'), title = gv('title'), project = gv('project');
   if (!date || !title || !project) return null;
-  const dir = v('direction'), docnum = v('docnum'), mgr = v('manager'),
-        cp = v('counterpart'), memo = v('memo'), link = v('manualLink');
-  let t = '- 수발신 문서 기록\n-------------------\n';
-  t += `- 날짜: ${date}\n- 구분: ${dir}\n- 프로젝트: ${project}\n`;
-  if (docnum) t += `- 문서번호: ${docnum}\n`;
-  t += `- 제목: ${title}\n- 유형: ${selType}\n`;
-  if (mgr) t += `- 담당자: ${mgr}\n`;
-  if (cp) t += `- 상대방/기관: ${cp}\n`;
-  if (attendees.length) t += `- 참석자: ${attendees.join(', ')}\n`;
-  if (memo) t += `- 주요 내용:\n${memo.split('\n').map(l => '   ' + l).join('\n')}\n`;
+  var dir = gv('direction'), docnum = gv('docnum'), mgr = gv('manager'),
+      cp = gv('counterpart'), memo = gv('memo'), link = gv('manualLink');
+  var t = '[수발신 문서 기록]\n';
+  t += '--------------------\n';
+  t += '날짜: ' + date + '\n';
+  t += '구분: ' + dir + '\n';
+  t += '프로젝트: ' + project + '\n';
+  if (docnum) t += '문서번호: ' + docnum + '\n';
+  t += '제목: ' + title + '\n';
+  t += '유형: ' + selType + '\n';
+  if (mgr) t += '담당자: ' + mgr + '\n';
+  if (cp) t += '상대방/기관: ' + cp + '\n';
+  if (attendees.length) t += '참석자: ' + attendees.join(', ') + '\n';
+  if (memo) t += '주요 내용:\n' + memo.split('\n').map(function(l){return '  '+l;}).join('\n') + '\n';
   if (attachedFiles.length) {
-    t += `- 첨부파일 (${attachedFiles.length}개):\n`;
-    attachedFiles.forEach((af, i) => {
-      t += `   ${i + 1}. ${af.file.name} [${fmtSize(af.file.size)}]`;
-      const lnk = fileLinks[i] || af.driveLink;
-      if (lnk) t += `\n      - ${lnk}`;
+    t += '첨부파일 (' + attachedFiles.length + '개):\n';
+    attachedFiles.forEach(function(af, i) {
+      t += '  ' + (i+1) + '. ' + af.file.name + ' [' + fmtSize(af.file.size) + ']';
+      var lnk = fileLinks[i] || af.driveLink;
+      if (lnk) t += '\n     ' + lnk;
       t += '\n';
     });
   }
-  if (link) t += `- 저장 위치: ${link}\n`;
-  t += `-------------------\n- 기록시각: ${new Date().toLocaleString('ko-KR')}`;
+  if (link) t += '저장 위치: ' + link + '\n';
+  t += '--------------------\n';
+  t += '기록시각: ' + new Date().toLocaleString('ko-KR');
   return t;
 }
 
-// --- LOG / PROGRESS -----------------------------------------------------------
 function setProgress(pct) {
-  const bar = document.getElementById('progressBar');
-  const fill = document.getElementById('progressFill');
+  var bar = document.getElementById('progressBar');
+  var fill = document.getElementById('progressFill');
   bar.classList.toggle('show', pct > 0 && pct < 100);
   fill.style.width = pct + '%';
 }
-function addLog(type, icon, msg) {
-  const wrap = document.getElementById('logWrap');
+
+function addLog(type, msg) {
+  var wrap = document.getElementById('logWrap');
   wrap.classList.add('show');
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.className = 'log-item ' + type;
-  div.innerHTML = `<span class="log-icon">${icon}</span><span>${msg}</span>`;
+  div.textContent = msg;
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
 }
+
 function clearLog() {
-  document.getElementById('logWrap').innerHTML = '';
-  document.getElementById('logWrap').classList.remove('show');
+  var wrap = document.getElementById('logWrap');
+  wrap.innerHTML = ''; wrap.classList.remove('show');
   setProgress(0);
 }
 
-// --- DRIVE UPLOAD ------------------------------------------------------------
-async function driveUpload(name, blobOrFile, mimeType = 'text/plain') {
-  const token = await getValidAccessToken();
-  if (!token || !cfg.folderId) return null;
-  const meta = JSON.stringify({ name, parents: [cfg.folderId] });
-  const form = new FormData();
-  form.append('metadata', new Blob([meta], { type: 'application/json' }));
-  form.append('file', blobOrFile instanceof Blob ? blobOrFile : new Blob([blobOrFile], { type: mimeType }));
-  const res = await fetch(DRIVE_UPLOAD_URL, {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token },
-    body: form
-  });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error?.message || res.statusText);
-  }
-  const data = await res.json();
-  return data.webViewLink || null;
-}
-
-async function uploadTextToDrive(filename, content) {
-  if (!cfg.refreshToken || !cfg.folderId) return null;
-  addLog('info', '-', '기록 텍스트 Drive 업로드 중...');
-  try {
-    const link = await driveUpload(filename, content, 'text/plain;charset=utf-8');
-    addLog('ok', '-', '기록 텍스트 업로드 완료');
-    return link;
-  } catch(e) {
-    addLog('err', '-', '텍스트 업로드 실패: ' + e.message);
-    return null;
-  }
-}
-
-async function uploadFileToDrive(af) {
-  if (!cfg.refreshToken || !cfg.folderId) { updateFileStatus(af.id, 'pending'); return null; }
-  updateFileStatus(af.id, 'uploading');
-  addLog('info', 'fil', `"${af.file.name}" 업로드 중...`);
-  try {
-    const link = await driveUpload(af.file.name, af.file, af.file.type || 'application/octet-stream');
-    updateFileStatus(af.id, 'done', link);
-    addLog('ok', '-', `"${af.file.name}" 업로드 완료`);
-    return link;
-  } catch(e) {
-    updateFileStatus(af.id, 'error');
-    addLog('err', '-', `"${af.file.name}" 실패: ` + e.message);
-    return null;
-  }
-}
-
-// --- TELEGRAM ----------------------------------------------------------------
-async function sendTelegram(text) {
-  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '-', '텔레그램 설정 없음 - 건너뜁니다'); return false; }
-  addLog('info', '-', '텔레그램 발송 중...');
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${cfg.botToken}/sendMessage`, {
+function driveUpload(name, blobData) {
+  return getAccessToken().then(function(token) {
+    if (!token || !cfg.folderId) return null;
+    var meta = JSON.stringify({name: name, parents: [cfg.folderId]});
+    var form = new FormData();
+    form.append('metadata', new Blob([meta], {type:'application/json'}));
+    form.append('file', blobData);
+    return fetch(DRIVE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: cfg.chatId, text })
+      headers: {'Authorization': 'Bearer ' + token},
+      body: form
+    }).then(function(res) { return res.json(); }).then(function(data) {
+      if (data.error) throw new Error(data.error.message);
+      return data.webViewLink || null;
     });
-    const data = await res.json();
-    if (data.ok) { addLog('ok', '-', '텔레그램 발송 완료'); return true; }
-    addLog('err', '-', '텔레그램 오류: ' + data.description); return false;
-  } catch(e) { addLog('err', '-', '텔레그램 오류: ' + e.message); return false; }
+  });
 }
 
-// --- MAIN SUBMIT -------------------------------------------------------------
-async function submitAll() {
-  const textPreview = buildRecord();
-  if (!textPreview) { showToast('날짜, 프로젝트명, 제목은 필수입니다'); return; }
+function uploadText(filename, content) {
+  if (!cfg.refreshToken || !cfg.folderId) return Promise.resolve(null);
+  addLog('info', '기록 텍스트 Drive 업로드 중...');
+  var blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  return driveUpload(filename, blob).then(function(link) {
+    addLog('ok', '기록 텍스트 업로드 완료');
+    return link;
+  }).catch(function(e) {
+    addLog('err', '텍스트 업로드 실패: ' + e.message);
+    return null;
+  });
+}
+
+function uploadFile(af) {
+  if (!cfg.refreshToken || !cfg.folderId) { updateFileStatus(af.id,'pending'); return Promise.resolve(null); }
+  updateFileStatus(af.id, 'uploading');
+  addLog('info', '"' + af.file.name + '" 업로드 중...');
+  return driveUpload(af.file.name, af.file).then(function(link) {
+    updateFileStatus(af.id, 'done', link);
+    addLog('ok', '"' + af.file.name + '" 업로드 완료');
+    return link;
+  }).catch(function(e) {
+    updateFileStatus(af.id, 'error');
+    addLog('err', '"' + af.file.name + '" 실패: ' + e.message);
+    return null;
+  });
+}
+
+function sendTelegram(text) {
+  if (!cfg.botToken || !cfg.chatId) { addLog('warn', '텔레그램 설정 없음 - 건너뜁니다'); return Promise.resolve(false); }
+  addLog('info', '텔레그램 발송 중...');
+  return fetch('https://api.telegram.org/bot' + cfg.botToken + '/sendMessage', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({chat_id: cfg.chatId, text: text})
+  }).then(function(res) { return res.json(); }).then(function(data) {
+    if (data.ok) { addLog('ok', '텔레그램 발송 완료'); return true; }
+    addLog('err', '텔레그램 오류: ' + data.description); return false;
+  }).catch(function(e) {
+    addLog('err', '텔레그램 오류: ' + e.message); return false;
+  });
+}
+
+function submitAll() {
+  var preview = buildRecord();
+  if (!preview) { showToast('날짜, 프로젝트명, 제목은 필수입니다'); return; }
   clearLog();
-  const btn = document.getElementById('mainBtn');
-  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> 처리 중...';
-  const outEl = document.getElementById('output');
+  var btn = document.getElementById('mainBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> 처리 중...';
+  var outEl = document.getElementById('output');
   outEl.classList.remove('empty');
 
-  const totalSteps = attachedFiles.length + 3;
-  let step = 0;
-  const tick = () => setProgress(Math.round((++step / totalSteps) * 90));
+  var totalSteps = attachedFiles.length + 3;
+  var step = 0;
+  function tick() { setProgress(Math.round((++step / totalSteps) * 90)); }
 
-  // 1. 첨부파일 업로드
-  const fileLinks = [];
+  var fileLinks = [];
+  var chain = Promise.resolve();
+
   if (attachedFiles.length) {
-    addLog('info', '-', `첨부파일 ${attachedFiles.length}개 Drive 업로드 시작...`);
-    for (const af of attachedFiles) { fileLinks.push(await uploadFileToDrive(af)); tick(); }
+    addLog('info', '첨부파일 ' + attachedFiles.length + '개 업로드 시작...');
+    attachedFiles.forEach(function(af) {
+      chain = chain.then(function() {
+        return uploadFile(af).then(function(lnk) { fileLinks.push(lnk); tick(); });
+      });
+    });
   }
 
-  // 2. 기록 텍스트 생성
-  const finalText = buildRecord(fileLinks);
-  outEl.textContent = finalText;
+  chain.then(function() {
+    var finalText = buildRecord(fileLinks);
+    outEl.textContent = finalText;
 
-  // 3. 기록 텍스트 Drive 업로드
-  const date = v('date').replace(/-/g, '');
-  const proj = v('project').replace(/\s/g, '_');
-  const ttl = v('title').replace(/\s/g, '_').slice(0, 30);
-  const textLink = await uploadTextToDrive(`${date}_${proj}_${ttl}.txt`, finalText);
-  tick();
-  if (textLink) document.getElementById('manualLink').value = textLink;
+    var date = gv('date').replace(/-/g,'');
+    var proj = gv('project').replace(/\s/g,'_');
+    var ttl = gv('title').replace(/\s/g,'_').slice(0,30);
+    var filename = date + '_' + proj + '_' + ttl + '.txt';
 
-  // 4. 텔레그램 발송
-  await sendTelegram(finalText + (textLink ? `\n- 기록 파일: ${textLink}` : ''));
-  tick();
-
-  // 5. 로컬 저장
-  const rec = {
-    text: finalText, date: v('date'), title: v('title'), type: selType,
-    project: v('project'), direction: v('direction'), attendees: [...attendees],
-    files: attachedFiles.map(af => ({ name: af.file.name, size: af.file.size, driveLink: af.driveLink })),
-    driveLink: textLink, ts: Date.now()
-  };
-  history.unshift(rec);
-  if (history.length > 30) history = history.slice(0, 30);
-  try { localStorage.setItem('sjs_docs', JSON.stringify(history)); } catch(e) {}
-  renderHistory();
-
-  setProgress(100); setTimeout(() => setProgress(0), 1200);
-  btn.disabled = false; btn.innerHTML = '- 저장 + Drive 업로드 + 텔레그램 발송';
-  showToast('완료됐습니다!');
+    return uploadText(filename, finalText).then(function(textLink) {
+      tick();
+      if (textLink) document.getElementById('manualLink').value = textLink;
+      var tgText = finalText + (textLink ? '\n기록 파일: ' + textLink : '');
+      return sendTelegram(tgText).then(function() {
+        tick();
+        var rec = {
+          text: finalText, date: gv('date'), title: gv('title'), type: selType,
+          project: gv('project'), direction: gv('direction'),
+          attendees: attendees.slice(),
+          files: attachedFiles.map(function(af) { return {name:af.file.name,size:af.file.size,driveLink:af.driveLink}; }),
+          driveLink: textLink, ts: Date.now()
+        };
+        history.unshift(rec);
+        if (history.length > 30) history = history.slice(0,30);
+        try { localStorage.setItem('sjs_docs', JSON.stringify(history)); } catch(e) {}
+        renderHistory();
+        setProgress(100);
+        setTimeout(function() { setProgress(0); }, 1200);
+        btn.disabled = false;
+        btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
+        showToast('완료됐습니다!');
+      });
+    });
+  }).catch(function(e) {
+    addLog('err', '오류: ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
+  });
 }
 
-async function onlyTelegram() {
-  const text = buildRecord();
+function onlyTelegram() {
+  var text = buildRecord();
   if (!text) { showToast('날짜, 프로젝트명, 제목은 필수입니다'); return; }
   document.getElementById('output').classList.remove('empty');
   document.getElementById('output').textContent = text;
-  clearLog(); await sendTelegram(text);
+  clearLog();
+  sendTelegram(text);
 }
-async function testTelegram() {
+
+function testTelegram() {
   if (!cfg.botToken || !cfg.chatId) { showToast('Bot Token과 Chat ID를 먼저 저장하세요'); return; }
-  clearLog(); document.getElementById('setupPanel').classList.add('open');
-  await sendTelegram('- 상지서울 수발신 문서 기록 시스템\n테스트 메시지입니다. 연동이 정상 완료됐습니다!');
+  clearLog();
+  document.getElementById('setupPanel').classList.add('open');
+  sendTelegram('상지서울 수발신 문서 기록 시스템\n테스트 메시지입니다. 연동이 정상 완료됐습니다!');
 }
+
 function openDrive() {
-  const link = v('manualLink');
-  window.open(link && link.startsWith('http') ? link : 'https://drive.google.com', '_blank');
+  var link = gv('manualLink');
+  window.open(link && link.indexOf('http') === 0 ? link : 'https://drive.google.com', '_blank');
 }
+
 function copyOutput() {
-  const t = document.getElementById('output').textContent;
-  if (!t || t.includes('위 항목을')) { showToast('먼저 기록을 생성하세요'); return; }
-  navigator.clipboard.writeText(t).then(() => showToast('복사됐습니다')).catch(() => showToast('텍스트를 선택해 복사하세요'));
+  var t = document.getElementById('output').textContent;
+  if (!t || t.indexOf('위 항목을') === 0) { showToast('먼저 기록을 생성하세요'); return; }
+  navigator.clipboard.writeText(t).then(function() { showToast('복사됐습니다'); }).catch(function() { showToast('텍스트를 선택해 복사하세요'); });
 }
+
 function resetAll() {
-  ['project','docnum','title','manager','counterpart','memo','manualLink'].forEach(id => document.getElementById(id).value = '');
+  ['project','docnum','title','manager','counterpart','memo','manualLink'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
   document.getElementById('direction').value = '수신';
   document.getElementById('charCount').textContent = '0자';
   attendees = []; renderTags();
-  attachedFiles = []; renderFileList();
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('on'));
+  attachedFiles = []; renderFiles();
+  document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('on'); });
   document.querySelector('.type-btn').classList.add('on'); selType = '공문';
-  const out = document.getElementById('output');
+  var out = document.getElementById('output');
   out.classList.add('empty'); out.textContent = '위 항목을 입력한 뒤 [저장 + 발송] 버튼을 누르세요.';
   clearLog(); showToast('초기화됐습니다');
 }
 
-// --- HISTORY -----------------------------------------------------------------
 function loadHistory() {
-  try { const h = localStorage.getItem('sjs_docs'); if (h) history = JSON.parse(h); } catch(e) {}
+  try { var h = localStorage.getItem('sjs_docs'); if (h) history = JSON.parse(h); } catch(e) {}
   renderHistory();
 }
+
 function renderHistory() {
-  const card = document.getElementById('recentCard');
-  const list = document.getElementById('recentList');
+  var card = document.getElementById('recentCard');
+  var list = document.getElementById('recentList');
   if (!history.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  list.innerHTML = history.slice(0, 8).map((r, i) => `
-    <div class="rec-item" onclick="restoreRecord(${i})">
-      <div class="rec-dot" style="background:${TYPE_COLORS[r.type] || '#888'}"></div>
-      <div class="rec-info">
-        <div class="rec-title">${r.title}</div>
-        <div class="rec-meta">${r.date} - ${r.type} - ${r.direction} - ${r.project}
-          ${r.attendees?.length ? ' - 참석자 ' + r.attendees.length + '명' : ''}
-          ${r.files?.length ? ' - 첨부 ' + r.files.length + '개' : ''}
-        </div>
-      </div>
-      <div class="rec-copy">복사</div>
-    </div>`).join('');
+  list.innerHTML = history.slice(0,8).map(function(r,i) {
+    var color = TYPE_COLORS[r.type] || '#888';
+    var meta = r.date + ' / ' + r.type + ' / ' + r.direction + ' / ' + r.project;
+    if (r.attendees && r.attendees.length) meta += ' / 참석자 ' + r.attendees.length + '명';
+    if (r.files && r.files.length) meta += ' / 첨부 ' + r.files.length + '개';
+    return '<div class="rec-item" onclick="restoreRecord(' + i + ')">'
+      + '<div class="rec-dot" style="background:' + color + '"></div>'
+      + '<div class="rec-info"><div class="rec-title">' + r.title + '</div>'
+      + '<div class="rec-meta">' + meta + '</div></div>'
+      + '<div class="rec-copy">복사</div></div>';
+  }).join('');
 }
+
 function restoreRecord(i) {
-  const out = document.getElementById('output');
+  var out = document.getElementById('output');
   out.classList.remove('empty'); out.textContent = history[i].text;
-  navigator.clipboard.writeText(history[i].text).then(() => showToast('이전 기록을 복사했습니다')).catch(() => {});
+  navigator.clipboard.writeText(history[i].text).then(function() { showToast('이전 기록을 복사했습니다'); }).catch(function(){});
 }
+
 function clearHistory() {
   if (!confirm('저장된 기록을 모두 삭제할까요?')) return;
   history = [];
@@ -1035,11 +897,10 @@ function clearHistory() {
   renderHistory(); showToast('삭제됐습니다');
 }
 
-// --- TOAST -------------------------------------------------------------------
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 
 init();
