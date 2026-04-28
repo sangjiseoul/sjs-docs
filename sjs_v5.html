@@ -785,30 +785,40 @@ function buildRecord(fileLinks) {
   if (!date || !title || !project) return null;
   var dir = gv('direction'), docnum = gv('docnum'), mgr = gv('manager'),
       cp = gv('counterpart'), memo = gv('memo'), link = gv('manualLink');
-  var t = '[수발신 문서 기록]\n';
-  t += '--------------------\n';
-  t += '날짜: ' + date + '\n';
-  t += '구분: ' + dir + '\n';
-  t += '프로젝트: ' + project + '\n';
-  if (docnum) t += '문서번호: ' + docnum + '\n';
-  t += '제목: ' + title + '\n';
-  t += '유형: ' + selType + '\n';
-  if (mgr) t += '작성자: ' + mgr + '\n';
-  if (cp) t += '상대방/기관: ' + cp + '\n';
-  if (attendees.length) t += '참석자: ' + attendees.join(', ') + '\n';
-  if (memo) t += '주요 내용:\n' + memo.split('\n').map(function(l){return '  '+l;}).join('\n') + '\n';
+  var t = '\uD83D\uDCC4 수발신 문서 기록\n';
+  t += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
+  t += '\n';
+  t += '\uD83D\uDCC5 날짜: ' + date + '\n';
+  t += '\uD83D\uDD04 구분: ' + dir + '\n';
+  t += '\uD83C\uDFD7 프로젝트: ' + project + '\n';
+  if (docnum) t += '\uD83D\uDD22 문서번호: ' + docnum + '\n';
+  t += '\uD83D\uDCCB 제목: ' + title + '\n';
+  t += '\uD83D\uDDC2 유형: ' + selType + '\n';
+  t += '\n';
+  if (mgr) t += '\uD83D\uDC64 작성자: ' + mgr + '\n';
+  if (cp) t += '\uD83C\uDFE2 상대방/기관: ' + cp + '\n';
+  if (attendees.length) t += '\uD83D\uDC65 참석자: ' + attendees.join(', ') + '\n';
+  if (memo) {
+    t += '\n';
+    t += '\uD83D\uDCDD 주요 내용:\n';
+    t += memo.split('\n').map(function(l){return '   ' + l;}).join('\n') + '\n';
+  }
   if (attachedFiles.length) {
-    t += '첨부파일 (' + attachedFiles.length + '개):\n';
+    t += '\n';
+    t += '\uD83D\uDCCE 첨부파일 (' + attachedFiles.length + '개):\n';
     attachedFiles.forEach(function(af, i) {
-      t += '  ' + (i+1) + '. ' + af.file.name + ' [' + fmtSize(af.file.size) + ']';
+      t += '   ' + (i+1) + '. ' + af.file.name + ' [' + fmtSize(af.file.size) + ']\n';
       var lnk = fileLinks[i] || af.driveLink;
-      if (lnk) t += '\n     ' + lnk;
-      t += '\n';
+      if (lnk) t += '   \uD83D\uDD17 ' + lnk + '\n';
     });
   }
-  if (link) t += '저장 위치: ' + link + '\n';
-  t += '--------------------\n';
-  t += '기록시각: ' + new Date().toLocaleString('ko-KR');
+  if (link) {
+    t += '\n';
+    t += '\uD83D\uDD17 저장 위치: ' + link + '\n';
+  }
+  t += '\n';
+  t += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
+  t += '\u23F0 기록시각: ' + new Date().toLocaleString('ko-KR');
   return t;
 }
 
@@ -1045,8 +1055,6 @@ function doSubmit() {
 
         // 4. 텔레그램 발송 (답글 유도 문구 포함)
         var tgText = finalText;
-        if (textLink) tgText += '\n Drive 폴더: ' + textLink;
-        tgText += '\n\n--- 이 메시지에 답글로 열람 확인 또는 댓글을 남겨주세요 ---';
 
         return sendTelegram(tgText).then(function() {
           tick();
