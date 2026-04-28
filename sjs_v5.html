@@ -962,8 +962,7 @@ function sendTelegram(text) {
   var chunks = [];
   var total = Math.ceil(text.length / MAX);
   for (var i = 0; i < total; i++) {
-    var prefix = '(' + (i+1) + '/' + total + ')
-';
+    var prefix = '(' + (i+1) + '/' + total + ')\n';
     chunks.push(prefix + text.slice(i * MAX, (i+1) * MAX));
   }
   addLog('info', '내용이 길어 ' + total + '개로 분할 발송합니다...');
