@@ -109,7 +109,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .log-item.err{background:var(--red-light);color:var(--red)}
 .log-item.warn{background:var(--orange-light);color:#875A00}
 .action-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
-.action-bar .main-btn{grid-column:1/-1}
+.action-bar .main-btn{grid-column:1/-1;padding:14px 16px}
 .btn{font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:11px 16px;border-radius:9px;border:0.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:100%}
 .btn:hover{background:var(--bg)}
 .btn:active{transform:scale(0.98)}
@@ -253,7 +253,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 <div class="card">
   <div class="sec-label">참여자 정보</div>
   <div class="grid">
-    <div class="field"><label>담당자</label><input type="text" id="manager" placeholder="내부 담당자"></div>
+    <div class="field"><label>작성자</label><input type="text" id="manager" placeholder="내부 담당자"></div>
     <div class="field"><label>상대방 / 기관</label><input type="text" id="counterpart" placeholder="발신처 또는 수신처"></div>
     <div class="field full"><label>참석자</label>
       <div class="att-row">
@@ -302,9 +302,12 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
   <div class="log-wrap" id="logWrap"></div>
   <div class="action-bar">
-    <button class="btn primary main-btn" id="mainBtn" onclick="submitAll()">&#128190; 저장 + Drive 업로드 + 텔레그램 발송</button>
-    <button class="btn tg" onclick="onlyTelegram()">&#9992; 텔레그램만 발송</button>
-    <button class="btn drive" onclick="openDrive()">Drive 열기</button>
+    <button class="btn primary main-btn" id="mainBtn" onclick="submitAll()">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+        <span style="font-size:15px;font-weight:700">회의록 전송</span>
+        <span style="font-size:10px;font-weight:400;opacity:0.85">저장 &middot; Drive 업로드 &middot; 텔레그램 발송</span>
+      </div>
+    </button>
     <button class="btn ghost" onclick="copyOutput()">&#128203; 텍스트 복사</button>
     <button class="btn ghost" onclick="resetAll()">&#8635; 초기화</button>
   </div>
@@ -358,7 +361,7 @@ function fmtSize(b) {
 
 var selType = '공문';
 var attendees = [];
-var history = [];
+var docHistory = [];
 var attachedFiles = [];
 var fileIdCnt = 0;
 var cfg = {clientId:'',clientSecret:'',folderId:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
@@ -633,7 +636,7 @@ function gv(id) { return document.getElementById(id).value.trim(); }
 
 function autoNum() {
   var d = gv('date').replace(/-/g,'').slice(0,6) || new Date().toISOString().slice(0,7).replace('-','');
-  document.getElementById('docnum').value = 'SJS-' + d + '-' + String(history.length+1).padStart(3,'0');
+  document.getElementById('docnum').value = 'SJS-' + d + '-' + String(docHistory.length+1).padStart(3,'0');
 }
 
 function buildRecord(fileLinks) {
@@ -650,7 +653,7 @@ function buildRecord(fileLinks) {
   if (docnum) t += '문서번호: ' + docnum + '\n';
   t += '제목: ' + title + '\n';
   t += '유형: ' + selType + '\n';
-  if (mgr) t += '담당자: ' + mgr + '\n';
+  if (mgr) t += '작성자: ' + mgr + '\n';
   if (cp) t += '상대방/기관: ' + cp + '\n';
   if (attendees.length) t += '참석자: ' + attendees.join(', ') + '\n';
   if (memo) t += '주요 내용:\n' + memo.split('\n').map(function(l){return '  '+l;}).join('\n') + '\n';
@@ -692,10 +695,11 @@ function clearLog() {
   setProgress(0);
 }
 
-function driveUpload(name, blobData) {
+// ---- Drive 파일 업로드 (특정 폴더 ID 지정) ----
+function driveUploadToFolder(name, blobData, parentId) {
   return getAccessToken().then(function(token) {
-    if (!token || !cfg.folderId) return null;
-    var meta = JSON.stringify({name: name, parents: [cfg.folderId]});
+    if (!token) return null;
+    var meta = JSON.stringify({name: name, parents: [parentId]});
     var form = new FormData();
     form.append('metadata', new Blob([meta], {type:'application/json'}));
     form.append('file', blobData);
@@ -705,29 +709,86 @@ function driveUpload(name, blobData) {
       body: form
     }).then(function(res) { return res.json(); }).then(function(data) {
       if (data.error) throw new Error(data.error.message);
-      return data.webViewLink || null;
+      return {id: data.id, link: data.webViewLink || null};
     });
   });
 }
 
-function uploadText(filename, content) {
+// ---- Drive 폴더 생성 ----
+function createDriveFolder(name, parentId) {
+  return getAccessToken().then(function(token) {
+    if (!token) return null;
+    var meta = JSON.stringify({
+      name: name,
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [parentId]
+    });
+    return fetch('https://www.googleapis.com/drive/v3/files?fields=id,webViewLink', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: meta
+    }).then(function(res) { return res.json(); }).then(function(data) {
+      if (data.error) throw new Error(data.error.message);
+      return {id: data.id, link: data.webViewLink || null};
+    });
+  });
+}
+
+// ---- 날짜 기반 폴더 구조 생성 후 폴더 ID 반환 ----
+// 구조: 루트폴더 > 연도 > 월 > 날짜 > [유형]프로젝트_작성자
+function getOrCreateSessionFolder(date, project, docType, author) {
   if (!cfg.refreshToken || !cfg.folderId) return Promise.resolve(null);
+
+  var parts = date.split('-'); // ['2026','05','01']
+  var year  = parts[0] + '년';
+  var month = parts[1] + '월';
+  var day   = parts[0] + '-' + parts[1] + '-' + parts[2];
+  var safeProject = project.replace(/[\\/:*?"<>|]/g,'_');
+  var safeAuthor  = author.replace(/[\\/:*?"<>|]/g,'_');
+  var sessionName = '[' + docType + '] ' + safeProject + '_' + safeAuthor;
+
+  // 순서대로 폴더 생성: 연도 > 월 > 일 > 세션
+  return createDriveFolder(year, cfg.folderId).then(function(yearFolder) {
+    var yearId = yearFolder ? yearFolder.id : cfg.folderId;
+    return createDriveFolder(month, yearId).then(function(monthFolder) {
+      var monthId = monthFolder ? monthFolder.id : yearId;
+      return createDriveFolder(day, monthId).then(function(dayFolder) {
+        var dayId = dayFolder ? dayFolder.id : monthId;
+        return createDriveFolder(sessionName, dayId).then(function(sessionFolder) {
+          return sessionFolder ? sessionFolder.id : dayId;
+        });
+      });
+    });
+  }).catch(function(e) {
+    addLog('warn', '폴더 생성 실패, 루트에 저장: ' + e.message);
+    return cfg.folderId;
+  });
+}
+
+function uploadText(filename, content, folderId) {
+  var targetFolder = folderId || cfg.folderId;
+  if (!cfg.refreshToken || !targetFolder) return Promise.resolve(null);
   addLog('info', '기록 텍스트 Drive 업로드 중...');
   var blob = new Blob([content], {type:'text/plain;charset=utf-8'});
-  return driveUpload(filename, blob).then(function(link) {
+  return driveUploadToFolder(filename, blob, targetFolder).then(function(result) {
     addLog('ok', '기록 텍스트 업로드 완료');
-    return link;
+    return result ? result.link : null;
   }).catch(function(e) {
     addLog('err', '텍스트 업로드 실패: ' + e.message);
     return null;
   });
 }
 
-function uploadFile(af) {
-  if (!cfg.refreshToken || !cfg.folderId) { updateFileStatus(af.id,'pending'); return Promise.resolve(null); }
+function uploadFile(af, folderId) {
+  var targetFolder = folderId || cfg.folderId;
+  if (!cfg.refreshToken || !targetFolder) { updateFileStatus(af.id,'pending'); return Promise.resolve(null); }
   updateFileStatus(af.id, 'uploading');
   addLog('info', '"' + af.file.name + '" 업로드 중...');
-  return driveUpload(af.file.name, af.file).then(function(link) {
+  return driveUploadToFolder(af.file.name, af.file, targetFolder).then(function(result) {
+    var link = result ? result.link : null;
     updateFileStatus(af.id, 'done', link);
     addLog('ok', '"' + af.file.name + '" 업로드 완료');
     return link;
@@ -763,59 +824,84 @@ function submitAll() {
   var outEl = document.getElementById('output');
   outEl.classList.remove('empty');
 
-  var totalSteps = attachedFiles.length + 3;
+  var totalSteps = attachedFiles.length + 4;
   var step = 0;
   function tick() { setProgress(Math.round((++step / totalSteps) * 90)); }
 
-  var fileLinks = [];
-  var chain = Promise.resolve();
+  var date    = gv('date');
+  var project = gv('project');
+  var author  = gv('manager');
+  var docType = selType;
 
-  if (attachedFiles.length) {
-    addLog('info', '첨부파일 ' + attachedFiles.length + '개 업로드 시작...');
-    attachedFiles.forEach(function(af) {
-      chain = chain.then(function() {
-        return uploadFile(af).then(function(lnk) { fileLinks.push(lnk); tick(); });
+  // 1. 세션 폴더 생성
+  addLog('info', 'Drive 폴더 구조 생성 중...');
+  getOrCreateSessionFolder(date, project, docType, author).then(function(sessionFolderId) {
+    tick();
+    if (sessionFolderId) {
+      addLog('ok', '폴더 생성 완료: [' + docType + '] ' + project + '_' + author);
+    }
+
+    var fileLinks = [];
+    var chain = Promise.resolve();
+
+    // 2. 첨부파일 업로드
+    if (attachedFiles.length) {
+      addLog('info', '첨부파일 ' + attachedFiles.length + '개 업로드 시작...');
+      attachedFiles.forEach(function(af) {
+        chain = chain.then(function() {
+          return uploadFile(af, sessionFolderId).then(function(lnk) { fileLinks.push(lnk); tick(); });
+        });
       });
-    });
-  }
+    }
 
-  chain.then(function() {
-    var finalText = buildRecord(fileLinks);
-    outEl.textContent = finalText;
+    chain.then(function() {
+      // 3. 기록 텍스트 생성 및 업로드
+      var finalText = buildRecord(fileLinks);
+      outEl.textContent = finalText;
 
-    var date = gv('date').replace(/-/g,'');
-    var proj = gv('project').replace(/\s/g,'_');
-    var ttl = gv('title').replace(/\s/g,'_').slice(0,30);
-    var filename = date + '_' + proj + '_' + ttl + '.txt';
+      var datePart   = date.replace(/-/g,'');
+      var projPart   = project.replace(/\s/g,'_');
+      var titlePart  = gv('title').replace(/\s/g,'_').slice(0,30);
+      var filename   = datePart + '_' + projPart + '_' + titlePart + '.txt';
 
-    return uploadText(filename, finalText).then(function(textLink) {
-      tick();
-      if (textLink) document.getElementById('manualLink').value = textLink;
-      var tgText = finalText + (textLink ? '\n기록 파일: ' + textLink : '');
-      return sendTelegram(tgText).then(function() {
+      return uploadText(filename, finalText, sessionFolderId).then(function(textLink) {
         tick();
-        var rec = {
-          text: finalText, date: gv('date'), title: gv('title'), type: selType,
-          project: gv('project'), direction: gv('direction'),
-          attendees: attendees.slice(),
-          files: attachedFiles.map(function(af) { return {name:af.file.name,size:af.file.size,driveLink:af.driveLink}; }),
-          driveLink: textLink, ts: Date.now()
-        };
-        history.unshift(rec);
-        if (history.length > 30) history = history.slice(0,30);
-        try { localStorage.setItem('sjs_docs', JSON.stringify(history)); } catch(e) {}
-        renderHistory();
-        setProgress(100);
-        setTimeout(function() { setProgress(0); }, 1200);
-        btn.disabled = false;
-        btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
-        showToast('완료됐습니다!');
+        if (textLink) document.getElementById('manualLink').value = textLink;
+
+        // 4. 텔레그램 발송 (답글 유도 문구 포함)
+        var tgText = finalText;
+        if (textLink) tgText += '\n Drive 폴더: ' + textLink;
+        tgText += '\n\n--- 이 메시지에 답글로 열람 확인 또는 댓글을 남겨주세요 ---';
+
+        return sendTelegram(tgText).then(function() {
+          tick();
+
+          // 5. 로컬 저장
+          var rec = {
+            text: finalText, date: date, title: gv('title'), type: selType,
+            project: project, direction: gv('direction'),
+            author: author,
+            attendees: attendees.slice(),
+            files: attachedFiles.map(function(af) { return {name:af.file.name,size:af.file.size,driveLink:af.driveLink}; }),
+            driveLink: textLink, ts: Date.now()
+          };
+          docHistory.unshift(rec);
+          if (docHistory.length > 30) docHistory = docHistory.slice(0,30);
+          try { localStorage.setItem('sjs_docs', JSON.stringify(docHistory)); } catch(e) {}
+          renderHistory();
+
+          setProgress(100);
+          setTimeout(function() { setProgress(0); }, 1200);
+          btn.disabled = false;
+          btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
+          showToast('완료됐습니다!');
+        });
       });
+    }).catch(function(e) {
+      addLog('err', '오류: ' + e.message);
+      btn.disabled = false;
+      btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
     });
-  }).catch(function(e) {
-    addLog('err', '오류: ' + e.message);
-    btn.disabled = false;
-    btn.innerHTML = '&#128190; 저장 + Drive 업로드 + 텔레그램 발송';
   });
 }
 
@@ -862,16 +948,16 @@ function resetAll() {
 }
 
 function loadHistory() {
-  try { var h = localStorage.getItem('sjs_docs'); if (h) history = JSON.parse(h); } catch(e) {}
+  try { var h = localStorage.getItem('sjs_docs'); if (h) docHistory = JSON.parse(h); } catch(e) {}
   renderHistory();
 }
 
 function renderHistory() {
   var card = document.getElementById('recentCard');
   var list = document.getElementById('recentList');
-  if (!history.length) { card.style.display = 'none'; return; }
+  if (!docHistory.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
-  list.innerHTML = history.slice(0,8).map(function(r,i) {
+  list.innerHTML = docHistory.slice(0,8).map(function(r,i) {
     var color = TYPE_COLORS[r.type] || '#888';
     var meta = r.date + ' / ' + r.type + ' / ' + r.direction + ' / ' + r.project;
     if (r.attendees && r.attendees.length) meta += ' / 참석자 ' + r.attendees.length + '명';
@@ -886,13 +972,13 @@ function renderHistory() {
 
 function restoreRecord(i) {
   var out = document.getElementById('output');
-  out.classList.remove('empty'); out.textContent = history[i].text;
-  navigator.clipboard.writeText(history[i].text).then(function() { showToast('이전 기록을 복사했습니다'); }).catch(function(){});
+  out.classList.remove('empty'); out.textContent = docHistory[i].text;
+  navigator.clipboard.writeText(docHistory[i].text).then(function() { showToast('이전 기록을 복사했습니다'); }).catch(function(){});
 }
 
 function clearHistory() {
   if (!confirm('저장된 기록을 모두 삭제할까요?')) return;
-  history = [];
+  docHistory = [];
   try { localStorage.removeItem('sjs_docs'); } catch(e) {}
   renderHistory(); showToast('삭제됐습니다');
 }
