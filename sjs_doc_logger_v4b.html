@@ -191,9 +191,38 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:#1C1B18;color:#fff;font-size:13px;font-family:'Noto Sans KR',sans-serif;padding:10px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:all 0.25s;z-index:9999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:500px){.grid{grid-template-columns:1fr}.field.full{grid-column:1}.action-bar{grid-template-columns:1fr}}
+
+/* 비밀번호 모달 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;display:none}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:28px 24px;width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--text-2);margin-bottom:18px;line-height:1.5}
+.modal-input{width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;margin-bottom:10px}
+.modal-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(108,63,197,0.1)}
+.modal-err{font-size:12px;color:var(--red);margin-bottom:10px;display:none}
+.modal-btns{display:flex;gap:8px}
+.modal-btn{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;border:0.5px solid var(--border)}
+.modal-btn.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.modal-btn.primary:hover{background:#5530a8}
+.modal-btn.ghost{background:#f5f4f0;color:var(--text-2)}
 </style>
 </head>
 <body>
+
+<div class="modal-overlay" id="pwModal">
+  <div class="modal-box">
+    <div class="modal-title">&#128274; API 설정 잠금</div>
+    <div class="modal-sub">관리자 비밀번호를 입력하세요.<br>배포자 외 무단 변경이 제한됩니다.</div>
+    <input type="password" class="modal-input" id="pwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="modal-err" id="pwErr">비밀번호가 올바르지 않습니다.</div>
+    <div class="modal-btns">
+      <button class="modal-btn ghost" onclick="closePwModal()">취소</button>
+      <button class="modal-btn primary" onclick="checkPw()">확인</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 
 <!-- TOP BAR -->
@@ -266,6 +295,11 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
       <input type="text" id="cfgChatId" placeholder="예) -1001234567890 또는 @채널명">
     </div>
   </div>
+  <div class="setup-field" style="margin-bottom:14px">
+      <label>&#128274; API 설정 관리자 비밀번호</label>
+      <input type="password" id="cfgAdminPw" placeholder="설정을 잠글 비밀번호 입력 (영문+숫자 권장)">
+      <span style="font-size:11px;color:var(--text-3);margin-top:4px;display:block">설정 후 저장하면 이후 API 설정 진입 시 비밀번호 확인이 필요합니다</span>
+    </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
     <button class="save-btn" onclick="saveSetup()">&#10003; 설정 저장</button>
     <button class="save-btn ghost" onclick="testTelegram()">텔레그램 테스트 발송</button>
@@ -430,7 +464,7 @@ var attendees = [];
 var docHistory = [];
 var attachedFiles = [];
 var fileIdCnt = 0;
-var cfg = {clientId:'',clientSecret:'',folderId:'',sheetId:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
+var cfg = {clientId:'',clientSecret:'',folderId:'',sheetId:'',adminPw:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
 
 // ---- 탭 ----
 function switchTab(tab) {
@@ -442,7 +476,37 @@ function switchTab(tab) {
   if (tab==='view') loadDocList();
 }
 
-function toggleSetup() { document.getElementById('setupPanel').classList.toggle('open'); }
+function toggleSetup() {
+  var panel = document.getElementById('setupPanel');
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+  } else {
+    if (cfg.adminPw) {
+      document.getElementById('pwInput').value = '';
+      document.getElementById('pwErr').style.display = 'none';
+      document.getElementById('pwModal').classList.add('open');
+      setTimeout(function(){ document.getElementById('pwInput').focus(); }, 100);
+    } else {
+      panel.classList.add('open');
+    }
+  }
+}
+
+function checkPw() {
+  var input = document.getElementById('pwInput').value;
+  if (input === cfg.adminPw) {
+    document.getElementById('pwModal').classList.remove('open');
+    document.getElementById('setupPanel').classList.add('open');
+  } else {
+    document.getElementById('pwErr').style.display = 'block';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function closePwModal() {
+  document.getElementById('pwModal').classList.remove('open');
+}
 
 function init() {
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
@@ -460,6 +524,7 @@ function loadCfg() {
   document.getElementById('cfgSheetId').value = cfg.sheetId||'';
   document.getElementById('cfgBotToken').value = cfg.botToken||'';
   document.getElementById('cfgChatId').value = cfg.chatId||'';
+  document.getElementById('cfgAdminPw').value = cfg.adminPw||'';
   updateBadges(); updateBanner();
 }
 
@@ -472,6 +537,7 @@ function saveSetup() {
   cfg.sheetId = document.getElementById('cfgSheetId').value.trim();
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
+  cfg.adminPw = document.getElementById('cfgAdminPw').value.trim();
   saveCfg(); updateBadges(); updateBanner();
   showToast('설정이 저장됐습니다');
   document.getElementById('setupPanel').classList.remove('open');
@@ -915,15 +981,41 @@ function uploadFile(af,folderId){
 }
 
 // ---- 텔레그램 ----
-function sendTelegram(text){
-  if(!cfg.botToken||!cfg.chatId) return Promise.resolve(false);
-  return fetch('https://api.telegram.org/bot'+cfg.botToken+'/sendMessage',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:cfg.chatId,text:text})
-  }).then(function(r){return r.json();}).then(function(d){
-    if(d.ok){addLog('ok','텔레그램 발송 완료');return true;}
-    addLog('err','텔레그램 오류: '+d.description);return false;
-  }).catch(function(e){addLog('err','텔레그램 오류: '+e.message);return false;});
+function sendTelegramChunk(text) {
+  return fetch('https://api.telegram.org/bot' + cfg.botToken + '/sendMessage', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({chat_id: cfg.chatId, text: text})
+  }).then(function(r) { return r.json(); });
+}
+
+function sendTelegram(text) {
+  if (!cfg.botToken || !cfg.chatId) return Promise.resolve(false);
+  var MAX = 4000;
+  if (text.length <= MAX) {
+    return sendTelegramChunk(text).then(function(data) {
+      if (data.ok) { addLog('ok', '텔레그램 발송 완료'); return true; }
+      addLog('err', '텔레그램 오류: ' + data.description); return false;
+    }).catch(function(e) { addLog('err', '텔레그램 오류: ' + e.message); return false; });
+  }
+  var chunks = [];
+  var total = Math.ceil(text.length / MAX);
+  for (var i = 0; i < total; i++) {
+    var prefix = '(' + (i+1) + '/' + total + ')
+';
+    chunks.push(prefix + text.slice(i * MAX, (i+1) * MAX));
+  }
+  addLog('info', '내용이 길어 ' + total + '개로 분할 발송합니다...');
+  var chain = Promise.resolve(true);
+  chunks.forEach(function(chunk, idx) {
+    chain = chain.then(function() {
+      return sendTelegramChunk(chunk).then(function(data) {
+        if (data.ok) { addLog('ok', '텔레그램 발송 완료 (' + (idx+1) + '/' + total + ')'); return true; }
+        addLog('err', '텔레그램 오류: ' + data.description); return false;
+      });
+    });
+  });
+  return chain;
 }
 function testTelegram(){
   if(!cfg.botToken||!cfg.chatId){showToast('Bot Token과 Chat ID를 먼저 저장하세요');return;}
