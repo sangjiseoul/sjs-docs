@@ -402,7 +402,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 <script>
 var TOKEN_URL = 'https://oauth2.googleapis.com/token';
 var DRIVE_URL = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink';
-var SCOPE = 'https://www.googleapis.com/auth/drive.file';
+var SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly';
 
 var TYPE_COLORS = {
   '공문':'#1A9E74','계약서':'#185FA5','견적서':'#BA7517',
@@ -1099,34 +1099,53 @@ function togglePdfPanel() {
 
 function loadPdfList() {
   var list = document.getElementById('pdfList');
-  if (!cfg.pdfFolderId || !cfg.refreshToken) {
-    list.innerHTML = '<div class="pdf-empty">API 설정에서 공문 Drive 폴더 ID를 입력하고 Google 인증을 완료하세요</div>';
+  if (!cfg.pdfFolderId) {
+    list.innerHTML = '<div class="pdf-empty">API 설정에서 공문 Drive 폴더 ID를 먼저 입력하세요</div>';
+    return;
+  }
+  if (!cfg.refreshToken) {
+    list.innerHTML = '<div class="pdf-empty">Google 인증이 필요합니다. API 설정에서 [Google 계정으로 인증하기]를 눌러주세요</div>';
     return;
   }
   list.innerHTML = '<div class="pdf-loading">&#8635; 목록 불러오는 중...</div>';
   getAccessToken().then(function(token) {
-    if (!token) { list.innerHTML = '<div class="pdf-empty">인증이 필요합니다. API 설정에서 Google 인증을 완료하세요</div>'; return; }
+    if (!token) {
+      list.innerHTML = '<div class="pdf-empty">인증 토큰을 가져오지 못했습니다. API 설정에서 Google 재인증을 해주세요</div>';
+      return;
+    }
+    var query = "'" + cfg.pdfFolderId + "' in parents and trashed=false";
     var url = 'https://www.googleapis.com/drive/v3/files'
-      + '?q=' + encodeURIComponent("'" + cfg.pdfFolderId + "' in parents and trashed=false")
+      + '?q=' + encodeURIComponent(query)
       + '&fields=files(id,name,size,mimeType,webViewLink,createdTime)'
       + '&orderBy=createdTime desc'
-      + '&pageSize=50';
+      + '&pageSize=100';
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
+        if (data.error) {
+          list.innerHTML = '<div class="pdf-empty">오류: ' + data.error.message + '</div>';
+          return;
+        }
         if (!data.files || !data.files.length) {
-          list.innerHTML = '<div class="pdf-empty">등록된 공문이 없습니다.<br>Drive 폴더에 PDF를 업로드하면 여기에 표시됩니다.</div>';
+          list.innerHTML = '<div class="pdf-empty">등록된 파일이 없습니다.<br>Drive 폴더에 공문 PDF를 업로드하면 여기에 표시됩니다.</div>';
           return;
         }
         list.innerHTML = data.files.map(function(f) {
-          var size = f.size ? (parseInt(f.size)/1024 < 1024 ? (parseInt(f.size)/1024).toFixed(0)+'KB' : (parseInt(f.size)/1048576).toFixed(1)+'MB') : '';
+          var size = '';
+          if (f.size) {
+            var bytes = parseInt(f.size);
+            size = bytes < 1048576 ? Math.round(bytes/1024)+'KB' : (bytes/1048576).toFixed(1)+'MB';
+          }
           var date = f.createdTime ? f.createdTime.slice(0,10) : '';
           var isPdf = (f.mimeType||'').indexOf('pdf') >= 0;
           var icon = isPdf ? 'PDF' : 'FILE';
-          return '<a class="pdf-item" href="' + (f.webViewLink||'#') + '" target="_blank">'
+          var link = f.webViewLink || ('https://drive.google.com/file/d/' + f.id + '/view');
+          return '<a class="pdf-item" href="' + link + '" target="_blank">'
             + '<div class="pdf-icon">' + icon + '</div>'
-            + '<div class="pdf-info"><div class="pdf-name">' + f.name + '</div>'
-            + '<div class="pdf-size">' + (date?date+' &middot; ':'') + size + '</div></div>'
+            + '<div class="pdf-info">'
+            + '<div class="pdf-name">' + f.name + '</div>'
+            + '<div class="pdf-size">' + (date ? date + (size?' &middot; '+size:'') : size) + '</div>'
+            + '</div>'
             + '<span class="pdf-arrow">&#8599;</span>'
             + '</a>';
         }).join('');
