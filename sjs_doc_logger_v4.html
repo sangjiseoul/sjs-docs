@@ -1162,7 +1162,7 @@ function loadPdfList() {
     return;
   }
   if (!cfg.refreshToken) {
-    list.innerHTML = '<div class="pdf-empty">Google 인증이 필요합니다. API 설정에서 [Google 계정으로 인증하기]를 눌러주세요</div>';
+    list.innerHTML = '<div class="pdf-empty">Google 인증이 필요합니다. API 설정에서 인증하세요</div>';
     return;
   }
   list.innerHTML = '<div class="pdf-loading">&#8635; 목록 불러오는 중...</div>';
@@ -1171,7 +1171,6 @@ function loadPdfList() {
       list.innerHTML = '<div class="pdf-empty">인증 토큰 오류. API 설정에서 Google 재인증해주세요</div>';
       return;
     }
-    // trashed=false 조건만으로 해당 폴더 내 모든 파일 조회
     var query = "'" + cfg.pdfFolderId + "' in parents and trashed=false";
     var url = 'https://www.googleapis.com/drive/v3/files'
       + '?q=' + encodeURIComponent(query)
@@ -1183,25 +1182,16 @@ function loadPdfList() {
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        // 오류 응답 상세 표시
         if (data.error) {
-          list.innerHTML = '<div class="pdf-empty">'
-            + 'Drive API 오류 (' + data.error.code + ')<br>'
-            + data.error.message + '<br><br>'
-            + '폴더 ID: ' + cfg.pdfFolderId + '<br>'
-            + '확인: Drive 폴더가 해당 Google 계정 소유인지 확인하세요</div>';
+          list.innerHTML = '<div class="pdf-empty">Drive API 오류 ' + data.error.code + ': ' + data.error.message + '</div>';
           return;
         }
         if (!data.files || !data.files.length) {
-          list.innerHTML = '<div class="pdf-empty">'
-            + '파일이 없거나 접근 권한이 없습니다.<br><br>'
-            + '폴더 ID: ' + cfg.pdfFolderId + '<br>'
-            + '1. Drive에서 해당 폴더를 열어 파일이 있는지 확인<br>'
-            + '2. 폴더 ID가 정확한지 확인 (URL 마지막 부분)<br>'
-            + '3. API 설정에서 Google 재인증 후 다시 시도</div>';
+          list.innerHTML = '<div class="pdf-empty">파일이 없거나 접근 권한이 없습니다.<br>폴더 ID가 정확한지 확인하고 Google 재인증 후 다시 시도하세요</div>';
           return;
         }
-        list.innerHTML = data.files.map(function(f) {
+        var html = '';
+        data.files.forEach(function(f) {
           var size = '';
           if (f.size) {
             var bytes = parseInt(f.size);
@@ -1212,17 +1202,21 @@ function loadPdfList() {
           var isFolder = mimeType.indexOf('folder') >= 0;
           var isPdf = mimeType.indexOf('pdf') >= 0;
           var icon = isFolder ? 'DIR' : (isPdf ? 'PDF' : 'FILE');
-          var link = f.webViewLink || ('https://drive.google.com/file/d/' + f.id + '/view');
-          if (isFolder) link = 'https://drive.google.com/drive/folders/' + f.id;
-          return '<a class="pdf-item" href="' + link + '" target="_blank">'
-            + '<div class="pdf-icon" style="' + (isFolder?'background:#EEF5FE;color:#1a73e8':isPdf?'':'background:#F1EFE8;color:#888') + '">' + icon + '</div>'
-            + '<div class="pdf-info">'
-            + '<div class="pdf-name">' + f.name + '</div>'
-            + '<div class="pdf-size">' + (date?date+(size?' &middot; '+size:''):'') + (isFolder?' (폴더)':'') + '</div>'
-            + '</div>'
-            + '<span class="pdf-arrow">&#8599;</span>'
-            + '</a>';
-        }).join('');
+          var iconStyle = isFolder ? 'background:#EEF5FE;color:#1a73e8' : (isPdf ? '' : 'background:#F1EFE8;color:#888');
+          var link = isFolder
+            ? 'https://drive.google.com/drive/folders/' + f.id
+            : (f.webViewLink || 'https://drive.google.com/file/d/' + f.id + '/view');
+          var meta = date + (size ? ' &middot; ' + size : '') + (isFolder ? ' (폴더)' : '');
+          html += '<a class="pdf-item" href="' + link + '" target="_blank">';
+          html += '<div class="pdf-icon" style="' + iconStyle + '">' + icon + '</div>';
+          html += '<div class="pdf-info">';
+          html += '<div class="pdf-name">' + f.name + '</div>';
+          html += '<div class="pdf-size">' + meta + '</div>';
+          html += '</div>';
+          html += '<span class="pdf-arrow">&#8599;</span>';
+          html += '</a>';
+        });
+        list.innerHTML = html;
       });
   }).catch(function(e) {
     list.innerHTML = '<div class="pdf-empty">오류: ' + e.message + '</div>';
