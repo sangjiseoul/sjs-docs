@@ -432,9 +432,9 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <div class="section-title">AI 기능 설정 (선택)</div>
   <div class="setup-grid">
     <div class="setup-field">
-      <label>Claude API Key (AI 자동 정리 기능)</label>
-      <input type="password" id="cfgClaudeKey" placeholder="sk-ant-api03-xxxxxxxxxx">
-      <span style="font-size:11px;color:var(--text-3);margin-top:4px;display:block">없으면 AI 기능을 사용할 수 없지만 나머지 기능은 정상 작동합니다. <a href="https://console.anthropic.com" target="_blank" style="color:var(--green)">발급받기</a></span>
+      <label>Google Gemini API Key (AI 자동 정리 기능 — 무료)</label>
+      <input type="password" id="cfgGeminiKey" placeholder="AIzaSy-xxxxxxxxxx">
+      <span style="font-size:11px;color:var(--text-3);margin-top:4px;display:block">완전 무료 — Google 계정만 있으면 바로 발급 가능합니다. <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--green)">무료 발급받기 (aistudio.google.com)</a></span>
     </div>
   </div>
 
@@ -770,7 +770,7 @@ function loadCfg() {
   document.getElementById('cfgBotToken').value     = cfg.botToken     || '';
   document.getElementById('cfgChatId').value       = cfg.chatId       || '';
   document.getElementById('cfgAdminPw').value      = cfg.adminPw      || '';
-  document.getElementById('cfgClaudeKey').value   = cfg.claudeKey   || '';
+  document.getElementById('cfgGeminiKey').value   = cfg.geminiKey   || '';
   updateBadges();
   updateBanner();
 
@@ -797,7 +797,7 @@ function saveSetup() {
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
   cfg.adminPw   = document.getElementById('cfgAdminPw').value.trim();
-  cfg.claudeKey = document.getElementById('cfgClaudeKey').value.trim();
+  cfg.geminiKey = document.getElementById('cfgGeminiKey').value.trim();
   saveCfg();
   updateBadges();
   updateBanner();
@@ -884,7 +884,7 @@ function startGoogleAuth() {
   cfg.botToken = document.getElementById('cfgBotToken').value.trim();
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
   cfg.adminPw   = document.getElementById('cfgAdminPw').value.trim();
-  cfg.claudeKey = document.getElementById('cfgClaudeKey').value.trim();
+  cfg.geminiKey = document.getElementById('cfgGeminiKey').value.trim();
   saveCfg();
   var redirectUri = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -1621,8 +1621,8 @@ function buildRecordFromData(rec) {
 var aiResultText = '';
 
 function aiOrganize() {
-  if (!cfg.claudeKey) {
-    showToast('AI 기능을 사용하려면 API 설정에서 Claude API Key를 입력하세요');
+  if (!cfg.geminiKey) {
+    showToast('AI 기능을 사용하려면 API 설정에서 Gemini API Key를 입력하세요 (무료 발급: aistudio.google.com/apikey)');
     document.getElementById('setupPanel').classList.add('open');
     return;
   }
@@ -1665,26 +1665,13 @@ function aiOrganize() {
     '',
     '간결하고 명확하게. 원본에 없는 내용은 추가하지 마세요.'
   ];
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': cfg.claudeKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: promptLines.join('\n') }]
-    })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  callGemini(promptLines.join('\n'), 1000).then(function(result) {
     document.getElementById('aiOrganizeBtn').disabled = false;
-    if (data.content && data.content[0]) {
-      aiResultText = data.content[0].text;
+    if (result.ok) {
+      aiResultText = result.text;
       resultBox.textContent = aiResultText;
-    } else if (data.error) {
-      resultBox.textContent = 'AI 오류: ' + (data.error.message || JSON.stringify(data.error));
+    } else {
+      resultBox.textContent = 'AI 오류: ' + result.error;
     }
   }).catch(function(e) {
     document.getElementById('aiOrganizeBtn').disabled = false;
@@ -1706,8 +1693,8 @@ function closeAiResult() {
 }
 
 function aiVerify() {
-  if (!cfg.claudeKey) {
-    showToast('AI 검증을 사용하려면 Claude API Key를 입력하세요');
+  if (!cfg.geminiKey) {
+    showToast('AI 검증을 사용하려면 Gemini API Key를 입력하세요 (무료 발급: aistudio.google.com/apikey)');
     document.getElementById('setupPanel').classList.add('open');
     return;
   }
@@ -1734,26 +1721,13 @@ function aiVerify() {
     '[{"type":"ok","message":"확인 내용"},{"type":"warn","message":"주의 내용"},{"type":"err","message":"오류 내용"}]',
     'type값: ok=정상, warn=주의, err=오류. 5개 이내.'
   ];
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': cfg.claudeKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 500,
-      messages: [{ role: 'user', content: verifyLines.join('\n') }]
-    })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  callGemini(verifyLines.join('\n'), 500).then(function(result) {
     document.getElementById('aiVerifyBtn').disabled = false;
-    if (!data.content || !data.content[0]) {
-      verifyWrap.innerHTML = '<div class="verify-item warn"><span>&#9888;</span>AI 응답 오류</div>';
+    if (!result.ok) {
+      verifyWrap.innerHTML = '<div class="verify-item warn"><span>&#9888;</span>AI 오류: ' + result.error + '</div>';
       return;
     }
-    var raw = data.content[0].text.trim();
+    var raw = result.text.trim();
     try {
       var jsonMatch = raw.match(/\[[\s\S]*\]/) || raw.match(/\{[\s\S]*\}/);
       var parsedRaw = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
@@ -1969,8 +1943,8 @@ function stat(num, label) {
 }
 
 function generateSummary() {
-  if (!cfg.claudeKey) {
-    showToast('AI 요약은 Claude API Key가 필요합니다. API 설정에서 입력하세요.');
+  if (!cfg.geminiKey) {
+    showToast('AI 요약은 Gemini API Key가 필요합니다. 무료 발급: aistudio.google.com/apikey');
     return;
   }
   var recs = getPeriodRecs();
@@ -2007,22 +1981,9 @@ function generateSummary() {
     '간결하고 실무적으로 작성해주세요. 각 항목은 불릿으로 정리하세요.'
   ];
 
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': cfg.claudeKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: promptLines.join('\n') }]
-    })
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  callGemini(promptLines.join('\n'), 1500).then(function(data) {
     btn.disabled = false;
-    if (data.content && data.content[0]) {
+    if (data.ok) {
       var labels2 = {today:'오늘', week:'이번 주', month:'이번 달', year:'올해'};
       var summaryParts = ['[' + labels2[currentPeriod] + ' 요약 보고서]'];
       if (projFilter) summaryParts.push('프로젝트: ' + projFilter);
@@ -2034,7 +1995,7 @@ function generateSummary() {
       resultEl.className = 'summary-result';
       resultEl.textContent = summaryText;
     } else {
-      resultEl.textContent = 'AI 오류: ' + (data.error ? data.error.message : '알 수 없는 오류');
+      resultEl.textContent = 'AI 오류: ' + (data.error || '알 수 없는 오류');
     }
   }).catch(function(e) {
     btn.disabled = false;
@@ -2051,6 +2012,29 @@ function sendSummaryTelegram() {
   if (!summaryText) { showToast('먼저 AI 요약을 생성하세요'); return; }
   if (!cfg.botToken || !cfg.chatId) { showToast('텔레그램 설정이 필요합니다'); return; }
   sendTelegram(summaryText).then(function() { showToast('텔레그램으로 발송됐습니다'); });
+}
+
+
+// ---- Gemini API 헬퍼 --------------------------------------------------------
+function callGemini(prompt, maxTokens) {
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + cfg.geminiKey;
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: maxTokens || 1000 }
+    })
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.error) return { ok: false, error: data.error.message || JSON.stringify(data.error) };
+    var text = '';
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      text = data.candidates[0].content.parts.map(function(p) { return p.text || ''; }).join('');
+    }
+    return { ok: true, text: text };
+  }).catch(function(e) {
+    return { ok: false, error: e.message };
+  });
 }
 
 function showToast(msg) {
