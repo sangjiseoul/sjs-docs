@@ -2193,7 +2193,7 @@ function sendSummaryTelegram() {
 
 // ---- Gemini API 헬퍼 --------------------------------------------------------
 function callGemini(prompt, maxTokens) {
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + cfg.geminiKey;
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=' + cfg.geminiKey;
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
