@@ -454,6 +454,15 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 
   <div class="divider"></div>
 
+  <div class="section-title">Google Sheets DB (공용 기록 저장소)</div>
+  <div class="setup-grid" style="margin-bottom:12px">
+    <div class="setup-field">
+      <label>Google Sheets ID</label>
+      <input type="text" id="cfgSheetId" placeholder="Sheets URL 중간 ID값">
+      <span style="font-size:11px;color:var(--text-3);margin-top:4px;display:block">모든 기기에서 동일한 기록을 공유합니다</span>
+    </div>
+  </div>
+  <div class="divider"></div>
   <div class="section-title">AI 기능 설정 (선택)</div>
   <div class="setup-grid">
     <div class="setup-field">
@@ -796,7 +805,7 @@ var attendees = [];
 var docHistory = [];
 var attachedFiles = [];
 var fileIdCnt = 0;
-var cfg = {clientId:'',clientSecret:'',folderId:'',adminPw:'',claudeKey:'',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
+var cfg = {clientId:'',clientSecret:'',folderId:'',adminPw:'',geminiKey:'',sheetId:'1ZyJttX0VQT2u0V3hdxWumLnxfSCMBQ4o8oXrOOsprYA',refreshToken:'',accessToken:'',tokenExpiry:0,botToken:'',chatId:''};
 
 function toggleSetup() {
   var panel = document.getElementById('setupPanel');
@@ -879,6 +888,7 @@ function loadCfg() {
   var urlChatId       = params.get('ci');
   var urlAdminPw      = params.get('pw');
   var urlGeminiKey    = params.get('gk');
+  var urlSheetId      = params.get('sid');
 
   if (urlClientId)     cfg.clientId     = urlClientId;
   if (urlClientSecret) cfg.clientSecret = urlClientSecret;
@@ -887,6 +897,7 @@ function loadCfg() {
   if (urlChatId)       cfg.chatId       = urlChatId;
   if (urlAdminPw)      cfg.adminPw      = urlAdminPw;
   if (urlGeminiKey)    cfg.geminiKey    = urlGeminiKey;
+  if (urlSheetId)      cfg.sheetId      = urlSheetId;
 
   // URL 파라미터가 있으면 자동 저장
   if (urlClientId || urlBotToken || urlFolderId) {
@@ -902,6 +913,7 @@ function loadCfg() {
   document.getElementById('cfgChatId').value       = cfg.chatId       || '';
   document.getElementById('cfgAdminPw').value      = cfg.adminPw      || '';
   document.getElementById('cfgGeminiKey').value   = cfg.geminiKey   || '';
+  if(document.getElementById('cfgSheetId')) document.getElementById('cfgSheetId').value = cfg.sheetId || '';
   updateBadges();
   updateBanner();
 
@@ -929,6 +941,7 @@ function saveSetup() {
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
   cfg.adminPw   = document.getElementById('cfgAdminPw').value.trim();
   cfg.geminiKey = document.getElementById('cfgGeminiKey').value.trim();
+  if(document.getElementById('cfgSheetId')) cfg.sheetId = document.getElementById('cfgSheetId').value.trim();
   saveCfg();
   updateBadges();
   updateBanner();
@@ -950,7 +963,8 @@ function generateShareUrl() {
     + '&bt='  + encodeURIComponent(cfg.botToken)
     + '&ci='  + encodeURIComponent(cfg.chatId)
     + (cfg.adminPw ? '&pw=' + encodeURIComponent(cfg.adminPw) : '')
-    + (cfg.geminiKey ? '&gk=' + encodeURIComponent(cfg.geminiKey) : '');
+    + (cfg.geminiKey ? '&gk=' + encodeURIComponent(cfg.geminiKey) : '')
+    + (cfg.sheetId ? '&sid=' + encodeURIComponent(cfg.sheetId) : '');
 
   navigator.clipboard.writeText(url).then(function() {
     showToast('배포 URL이 복사됐습니다! 팀원들에게 이 링크를 공유하세요');
@@ -1020,6 +1034,7 @@ function startGoogleAuth() {
   cfg.chatId = document.getElementById('cfgChatId').value.trim();
   cfg.adminPw   = document.getElementById('cfgAdminPw').value.trim();
   cfg.geminiKey = document.getElementById('cfgGeminiKey').value.trim();
+  if(document.getElementById('cfgSheetId')) cfg.sheetId = document.getElementById('cfgSheetId').value.trim();
   saveCfg();
   var redirectUri = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -1497,7 +1512,27 @@ function doSubmit() {
         return sendTelegram(tgText).then(function() {
           tick();
 
-          // 5. 로컬 저장
+          // 5. Sheets에 저장
+          if (cfg.sheetId && cfg.refreshToken) {
+            var docId = 'SJS-' + Date.now();
+            sheetsInit().then(function() {
+              sheetsAppend([
+                docId,
+                date,
+                project,
+                gv('title'),
+                selType,
+                gv('direction'),
+                author,
+                attendees.join(','),
+                gv('memo'),
+                textLink || '',
+                new Date().toLocaleString('ko-KR')
+              ]);
+            });
+          }
+
+          // 6. 로컬 저장
           var rec = {
             text: finalText, date: date, title: gv('title'), type: selType,
             project: project, direction: gv('direction'),
@@ -1888,8 +1923,8 @@ function switchMainTab(tab) {
     p.classList.remove('active');
   });
   document.getElementById('mainTab-' + tab).classList.add('active');
-  if (tab === 'calendar') renderCalendar();
-  if (tab === 'summary') { renderSummaryStats(); updateProjFilter(); }
+  if (tab === 'calendar') loadSheetsAndRender('calendar');
+  if (tab === 'summary') loadSheetsAndRender('summary');
   if (tab === 'search') { doSearch(); }
 }
 
@@ -1907,7 +1942,7 @@ var TYPE_COLORS_CAL = {
 function calMove(dir) { calMonth += dir; if (calMonth > 11){calMonth=0;calYear++;} if (calMonth < 0){calMonth=11;calYear--;} renderCalendar(); }
 function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); renderCalendar(); }
 
-function renderCalendar() {
+function renderCalendar(data) {
   var months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   document.getElementById('calTitle').textContent = calYear + '년 ' + months[calMonth];
   var today = new Date();
@@ -1919,7 +1954,8 @@ function renderCalendar() {
 
   // 기록을 날짜별로 인덱싱
   var recByDate = {};
-  docHistory.forEach(function(r) {
+  var calData = data || sheetsDocHistory || docHistory;
+  calData.forEach(function(r) {
     if (r.date) {
       if (!recByDate[r.date]) recByDate[r.date] = [];
       recByDate[r.date].push(r);
@@ -2020,10 +2056,11 @@ function setPeriod(p) {
   summaryText = '';
 }
 
-function getPeriodRecs() {
+function getPeriodRecs(data) {
   var now = new Date();
   var proj = document.getElementById('summaryProjFilter') ? document.getElementById('summaryProjFilter').value : '';
-  return docHistory.filter(function(r) {
+  var src = data || sheetsDocHistory || docHistory;
+  return src.filter(function(r) {
     if (!r.date) return false;
     if (proj && r.project !== proj) return false;
     var d = new Date(r.date);
@@ -2039,11 +2076,12 @@ function getPeriodRecs() {
   });
 }
 
-function updateProjFilter() {
+function updateProjFilter(data) {
   var sel = document.getElementById('summaryProjFilter');
   var current = sel.value;
   var projs = [];
-  docHistory.forEach(function(r) { if (r.project && projs.indexOf(r.project)<0) projs.push(r.project); });
+  var src = data || sheetsDocHistory || docHistory;
+  src.forEach(function(r) { if (r.project && projs.indexOf(r.project)<0) projs.push(r.project); });
   sel.innerHTML = '<option value="">전체 프로젝트</option>';
   projs.forEach(function(p) {
     var opt = document.createElement('option');
@@ -2053,8 +2091,8 @@ function updateProjFilter() {
   });
 }
 
-function renderSummaryStats() {
-  var recs = getPeriodRecs();
+function renderSummaryStats(data) {
+  var recs = getPeriodRecs(data);
   var statEl = document.getElementById('summaryStats');
   var resultEl = document.getElementById('summaryResult');
   if (!recs.length) {
@@ -2178,6 +2216,7 @@ function callGemini(prompt, maxTokens) {
 
 // ---- 자동완성 ---------------------------------------------------------------
 function getProjectList() {
+  // 로컬 기록에서 추출 (동기)
   var projs = [];
   docHistory.forEach(function(r) {
     if (r.project && projs.indexOf(r.project) < 0) projs.push(r.project);
@@ -2185,28 +2224,41 @@ function getProjectList() {
   return projs;
 }
 
+function getProjectListRemote(callback) {
+  // Sheets에서 전체 프로젝트 목록 가져오기 (비동기)
+  if (!cfg.sheetId || !cfg.refreshToken) { callback(getProjectList()); return; }
+  sheetsGetProjects().then(function(projs) {
+    // 로컬 목록과 합치기
+    var local = getProjectList();
+    local.forEach(function(p) { if (projs.indexOf(p) < 0) projs.push(p); });
+    callback(projs);
+  }).catch(function() { callback(getProjectList()); });
+}
+
 function acInput(input, listId) {
   var val = input.value.trim().toLowerCase();
   var list = document.getElementById(listId);
   if (!val) { list.classList.remove('show'); return; }
-  var projs = getProjectList().filter(function(p) {
-    return p.toLowerCase().indexOf(val) !== -1;
-  });
-  if (!projs.length) { list.classList.remove('show'); return; }
-  list.innerHTML = '';
-  projs.forEach(function(p) {
-    var div = document.createElement('div');
-    div.className = 'autocomplete-item';
-    div.textContent = p;
-    div.dataset.value = p;
-    div.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      document.getElementById('project').value = p;
-      list.classList.remove('show');
+  getProjectListRemote(function(allProjs) {
+    var projs = allProjs.filter(function(p) {
+      return p.toLowerCase().indexOf(val) !== -1;
     });
-    list.appendChild(div);
+    if (!projs.length) { list.classList.remove('show'); return; }
+    list.innerHTML = '';
+    projs.forEach(function(p) {
+      var div = document.createElement('div');
+      div.className = 'autocomplete-item';
+      div.textContent = p;
+      div.dataset.value = p;
+      div.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        document.getElementById('project').value = p;
+        list.classList.remove('show');
+      });
+      list.appendChild(div);
+    });
+    list.classList.add('show');
   });
-  list.classList.add('show');
 }
 
 function acSelect(listId, value) {
@@ -2251,7 +2303,8 @@ function doSearch() {
   var dateTo  = document.getElementById('srchDateTo').value;
   var keyword = (document.getElementById('srchKeyword').value||'').trim().toLowerCase();
 
-  var results = docHistory.filter(function(r) {
+  var src = sheetsDocHistory || docHistory;
+  var results = src.filter(function(r) {
     if (proj && !(r.project||'').toLowerCase().includes(proj)) return false;
     if (type && r.type !== type) return false;
     if (author && !(r.author||'').toLowerCase().includes(author)) return false;
@@ -2309,6 +2362,123 @@ function showSearchResult(idx) {
   navigator.clipboard.writeText(r.text).catch(function(){});
   showToast(r.title + ' 기록을 복사했습니다');
 }
+
+
+// ---- Google Sheets DB -------------------------------------------------------
+var SHEET_NAME = 'SJS_DB';
+var SHEET_HEADERS = ['문서ID','날짜','프로젝트','제목','유형','구분','작성자','참석자','주요내용','DriveLink','타임스탬프'];
+
+function sheetsReq(method, path, body) {
+  return getAccessToken().then(function(token) {
+    if (!token || !cfg.sheetId) return null;
+    var url = 'https://sheets.googleapis.com/v4/spreadsheets/' + cfg.sheetId + path;
+    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    return fetch(url, opts).then(function(r) { return r.json(); });
+  });
+}
+
+function sheetsInit() {
+  // 시트가 없으면 생성 + 헤더 추가
+  return sheetsReq('GET', '/values/' + encodeURIComponent(SHEET_NAME + '!A1'), null).then(function(data) {
+    if (data && data.values) return Promise.resolve(); // 이미 존재
+    // 시트 없음 → 생성
+    return sheetsReq('POST', ':batchUpdate', {
+      requests: [{ addSheet: { properties: { title: SHEET_NAME } } }]
+    }).then(function() {
+      return sheetsReq('PUT',
+        '/values/' + encodeURIComponent(SHEET_NAME + '!A1') + '?valueInputOption=RAW',
+        { values: [SHEET_HEADERS] }
+      );
+    });
+  }).catch(function() { return Promise.resolve(); });
+}
+
+function sheetsAppend(row) {
+  if (!cfg.sheetId || !cfg.refreshToken) return Promise.resolve(null);
+  return sheetsReq('POST',
+    '/values/' + encodeURIComponent(SHEET_NAME + '!A:K') + ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',
+    { values: [row] }
+  );
+}
+
+function sheetsGetAll() {
+  if (!cfg.sheetId || !cfg.refreshToken) return Promise.resolve([]);
+  return sheetsReq('GET', '/values/' + encodeURIComponent(SHEET_NAME + '!A:K'), null).then(function(data) {
+    if (!data || !data.values || data.values.length <= 1) return [];
+    return data.values.slice(1).map(function(r) {
+      return {
+        docId:    r[0]  || '',
+        date:     r[1]  || '',
+        project:  r[2]  || '',
+        title:    r[3]  || '',
+        type:     r[4]  || '',
+        direction:r[5]  || '',
+        author:   r[6]  || '',
+        attendees:r[7]  ? r[7].split(',') : [],
+        memo:     r[8]  || '',
+        driveLink:r[9]  || '',
+        ts:       r[10] || '',
+        text: '[' + (r[1]||'') + '] ' + (r[3]||'')
+      };
+    });
+  }).catch(function() { return []; });
+}
+
+function sheetsGetProjects() {
+  return sheetsGetAll().then(function(rows) {
+    var projs = [];
+    rows.forEach(function(r) {
+      if (r.project && projs.indexOf(r.project) < 0) projs.push(r.project);
+    });
+    return projs;
+  });
+}
+
+function sheetsUpdate(rowIndex, col, value) {
+  var range = SHEET_NAME + '!' + col + (rowIndex + 2);
+  return sheetsReq('PUT',
+    '/values/' + encodeURIComponent(range) + '?valueInputOption=RAW',
+    { values: [[value]] }
+  );
+}
+
+
+function loadSheetsAndRender(tab) {
+  if (!cfg.sheetId || !cfg.refreshToken) {
+    if (tab === 'calendar') renderCalendar();
+    if (tab === 'summary') { renderSummaryStats(); updateProjFilter(); }
+    return;
+  }
+  sheetsGetAll().then(function(rows) {
+    // Sheets 기록을 docHistory 형식으로 변환 후 병합
+    var sheetRecs = rows.map(function(r) {
+      return {
+        date: r.date, title: r.title, type: r.type,
+        project: r.project, direction: r.direction,
+        author: r.author, attendees: r.attendees,
+        memo: r.memo, driveLink: r.driveLink,
+        text: r.text, ts: r.ts ? new Date(r.ts).getTime() : 0,
+        fromSheets: true
+      };
+    });
+    // 로컬 기록과 합치기 (중복 제거: 같은 날짜+제목)
+    var merged = sheetRecs.slice();
+    docHistory.forEach(function(r) {
+      var dup = merged.some(function(s) { return s.date===r.date && s.title===r.title; });
+      if (!dup) merged.push(r);
+    });
+    merged.sort(function(a,b) { return (b.ts||0)-(a.ts||0); });
+    sheetsDocHistory = merged;
+    if (tab === 'calendar') renderCalendar(merged);
+    if (tab === 'summary') { renderSummaryStats(merged); updateProjFilter(merged); }
+  }).catch(function() {
+    if (tab === 'calendar') renderCalendar();
+    if (tab === 'summary') { renderSummaryStats(); updateProjFilter(); }
+  });
+}
+
+var sheetsDocHistory = null;
 
 function showToast(msg) {
   var t = document.getElementById('toast');
