@@ -2047,7 +2047,7 @@ function generateSummary() {
       summaryParts.push('문서 ' + recs.length + '건 기준');
       summaryParts.push(new Date().toLocaleString('ko-KR'));
       summaryParts.push('');
-      summaryParts.push(data.content[0].text);
+      summaryParts.push(data.text || '');
       summaryText = summaryParts.join('\n');
       resultEl.className = 'summary-result';
       resultEl.textContent = summaryText;
