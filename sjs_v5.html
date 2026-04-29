@@ -620,7 +620,64 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <div id="recentList"></div>
 </div>
 
+
+</div><!-- /mainTab-write -->
+
+<!-- 탭: 캘린더 -->
+<div class="main-tab-panel" id="mainTab-calendar">
+<div class="cal-wrap">
+  <div class="cal-head">
+    <div class="cal-title" id="calTitle"></div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calMove(-1)">&#8592;</button>
+      <button class="cal-nav-btn" onclick="calToday()">오늘</button>
+      <button class="cal-nav-btn" onclick="calMove(1)">&#8594;</button>
+    </div>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-dow">
+      <div class="cal-dow-cell">일</div><div class="cal-dow-cell">월</div>
+      <div class="cal-dow-cell">화</div><div class="cal-dow-cell">수</div>
+      <div class="cal-dow-cell">목</div><div class="cal-dow-cell">금</div>
+      <div class="cal-dow-cell">토</div>
+    </div>
+    <div class="cal-days" id="calDays"></div>
+  </div>
+  <div class="cal-detail" id="calDetail" style="display:none">
+    <div class="cal-detail-title" id="calDetailTitle"></div>
+    <div id="calDetailList"></div>
+  </div>
 </div>
+</div>
+
+<!-- 탭: 기간 요약 -->
+<div class="main-tab-panel" id="mainTab-summary">
+<div class="summary-wrap">
+  <div class="summary-head">
+    <div class="sec-label" style="margin-bottom:12px">기간 선택</div>
+    <div class="period-btns">
+      <button class="period-btn on" id="pb-today" onclick="setPeriod('today')">오늘</button>
+      <button class="period-btn" id="pb-week" onclick="setPeriod('week')">이번 주</button>
+      <button class="period-btn" id="pb-month" onclick="setPeriod('month')">이번 달</button>
+      <button class="period-btn" id="pb-year" onclick="setPeriod('year')">올해</button>
+    </div>
+    <select class="proj-select" id="summaryProjFilter" onchange="renderSummaryStats()">
+      <option value="">전체 프로젝트</option>
+    </select>
+  </div>
+  <div class="summary-body">
+    <div class="summary-stat-grid" id="summaryStats"></div>
+    <div class="sec-label" style="margin-bottom:10px">AI 요약</div>
+    <div class="summary-result empty" id="summaryResult">기간을 선택하고 [AI 요약 생성] 버튼을 누르세요.</div>
+    <div class="summary-actions">
+      <button class="ai-btn primary" id="summaryAiBtn" onclick="generateSummary()">&#129302; AI 요약 생성</button>
+      <button class="ai-btn" onclick="copySummary()">&#128203; 복사</button>
+      <button class="ai-btn" onclick="sendSummaryTelegram()">&#9992; 텔레그램 발송</button>
+    </div>
+  </div>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
