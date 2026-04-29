@@ -483,11 +483,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
       </select>
     </div>
     <div class="field full"><label>프로젝트명 *</label><input type="text" id="project" placeholder="프로젝트명 입력"></div>
-    <div class="field full"><label>문서번호</label>
-      <div class="docnum-row">
-        <input type="text" id="docnum" placeholder="예) SJS-202605-001">
-    </div>
-    <div class="field full"><label>제목 *</label><input type="text" id="title" placeholder="문서 제목 입력"></div>
+    <div class="field full"><label>제목<div class="field full"><label>제목 *</label><input type="text" id="title" placeholder="문서 제목 입력"></div>
     <div class="field full"><label>문서 유형</label>
       <div class="type-wrap">
         <div class="type-btn on" onclick="pickType(this)">회의록</div>
@@ -495,10 +491,9 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
         <div class="type-btn" onclick="pickType(this)">공문</div>
         <div class="type-btn" onclick="pickType(this)">계약서</div>
         <div class="type-btn" onclick="pickType(this)">견적서</div>
-        <div class="type-btn" onclick="pickType(this)">수발신 메일</div>
         <div class="type-btn" onclick="pickType(this)">녹취자료</div>
         <div class="type-btn" onclick="pickType(this)">기타</div>
-      </div>>
+      </div>
     </div>
   </div>
 </div>
@@ -891,9 +886,12 @@ function generateShareUrl() {
 function updateBadges() {
   var hasDrive = !!(cfg.refreshToken && cfg.folderId);
   var hasTg = !!(cfg.botToken && cfg.chatId);
+  var hasAI = !!cfg.geminiKey;
   document.getElementById('dotDrive').className = 'dot ' + (hasDrive ? 'ok' : '');
   document.getElementById('labelDrive').textContent = hasDrive ? 'Google Drive (자동갱신)' : 'Google Drive';
   document.getElementById('dotTg').className = 'dot ' + (hasTg ? 'ok' : '');
+  document.getElementById('dotAI').className = 'dot ' + (hasAI ? 'ok' : '');
+  document.getElementById('labelAI').textContent = hasAI ? 'Gemini AI 준비됨' : 'AI 미설정';
 }
 
 function updateBanner() {
