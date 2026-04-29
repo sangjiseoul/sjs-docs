@@ -287,6 +287,30 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .summary-stat{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
 .summary-stat-num{font-size:20px;font-weight:700;color:var(--green)}
 .summary-stat-label{font-size:11px;color:var(--text-3);margin-top:2px}
+
+/* 자동완성 */
+.autocomplete-wrap{position:relative}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--card);border:0.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;z-index:100;display:none;box-shadow:var(--shadow-md)}
+.autocomplete-list.show{display:block}
+.autocomplete-item{padding:9px 12px;font-size:13px;cursor:pointer;color:var(--text);transition:background 0.1s}
+.autocomplete-item:hover,.autocomplete-item.selected{background:var(--green-light);color:var(--green-dark)}
+.autocomplete-item strong{color:var(--green-dark)}
+
+/* 검색 패널 */
+.search-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);padding:16px 18px;margin-bottom:14px}
+.search-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.search-field{display:flex;flex-direction:column;gap:4px}
+.search-field label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.05em}
+.search-field input,.search-field select{font-family:'Noto Sans KR',sans-serif;font-size:13px;color:var(--text);background:#FAFAF8;border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;width:100%;outline:none}
+.search-field input:focus,.search-field select:focus{border-color:var(--green)}
+.search-results{display:flex;flex-direction:column;gap:6px;max-height:400px;overflow-y:auto}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:8px;cursor:pointer;transition:background 0.15s}
+.search-result-item:hover{background:var(--border-light)}
+.search-empty{text-align:center;padding:24px;color:var(--text-3);font-size:13px}
+.search-count{font-size:12px;color:var(--text-2);margin-bottom:8px}
+
+/* 기간요약 빈 상태 */
+.summary-empty{text-align:center;padding:24px;color:var(--text-3);font-size:13px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -354,6 +378,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <button class="main-tab active" onclick="switchMainTab('write')">문서 작성</button>
   <button class="main-tab" onclick="switchMainTab('calendar')">&#128197; 캘린더</button>
   <button class="main-tab" onclick="switchMainTab('summary')">&#129302; 기간 요약</button>
+  <button class="main-tab" onclick="switchMainTab('search')">&#128269; 검색</button>
 </div>
 
 <!-- 탭: 문서 작성 -->
@@ -482,7 +507,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
         <option value="발신">발신 (보냄)</option>
       </select>
     </div>
-    <div class="field full"><label>프로젝트명 *</label><input type="text" id="project" placeholder="프로젝트명 입력"></div>
+    <div class="field full">
+      <label>프로젝트명 *</label>
+      <div class="autocomplete-wrap">
+        <input type="text" id="project" placeholder="프로젝트명 입력" autocomplete="off"
+          oninput="acInput(this,'project-ac')"
+          onkeydown="acKey(event,'project-ac')"
+          onblur="setTimeout(function(){acHide('project-ac')},200)">
+        <div class="autocomplete-list" id="project-ac"></div>
+      </div>
+    </div>
     <div class="field full"><label>제목<div class="field full"><label>제목 *</label><input type="text" id="title" placeholder="문서 제목 입력"></div>
     <div class="field full"><label>문서 유형</label>
       <div class="type-wrap">
@@ -666,7 +700,51 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
       <button class="ai-btn primary" id="summaryAiBtn" onclick="generateSummary()">&#129302; AI 요약 생성</button>
       <button class="ai-btn" onclick="copySummary()">&#128203; 복사</button>
       <button class="ai-btn" onclick="sendSummaryTelegram()">&#9992; 텔레그램 발송</button>
+</div>
+</div>
+
+<!-- 탭: 검색 -->
+<div class="main-tab-panel" id="mainTab-search">
+<div class="search-panel">
+  <div class="sec-label" style="margin-bottom:12px">기록 검색</div>
+  <div class="search-grid">
+    <div class="search-field">
+      <label>프로젝트</label>
+      <input type="text" id="srchProject" placeholder="프로젝트명" oninput="doSearch()">
     </div>
+    <div class="search-field">
+      <label>문서 유형</label>
+      <select id="srchType" onchange="doSearch()">
+        <option value="">전체</option>
+        <option>회의록</option>
+        <option>협의사항</option>
+        <option>공문</option>
+        <option>계약서</option>
+        <option>견적서</option>
+        <option>녹취자료</option>
+        <option>기타</option>
+      </select>
+    </div>
+    <div class="search-field">
+      <label>작성자</label>
+      <input type="text" id="srchAuthor" placeholder="작성자 이름" oninput="doSearch()">
+    </div>
+    <div class="search-field">
+      <label>날짜 (시작)</label>
+      <input type="date" id="srchDateFrom" onchange="doSearch()">
+    </div>
+    <div class="search-field">
+      <label>날짜 (종료)</label>
+      <input type="date" id="srchDateTo" onchange="doSearch()">
+    </div>
+    <div class="search-field">
+      <label>키워드</label>
+      <input type="text" id="srchKeyword" placeholder="제목 또는 내용 검색" oninput="doSearch()">
+    </div>
+  </div>
+  <div class="search-count" id="srchCount"></div>
+  <div class="search-results" id="srchResults">
+    <div class="search-empty">검색 조건을 입력하면 결과가 표시됩니다</div>
   </div>
 </div>
 </div>
@@ -1109,12 +1187,9 @@ function renderTags() {
   }).join('');
 }
 
-function gv(id) { return document.getElementById(id).value.trim(); }
+function gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
-function autoNum() {
-  var d = gv('date').replace(/-/g,'').slice(0,6) || new Date().toISOString().slice(0,7).replace('-','');
-  document.getElementById('docnum').value = 'SJS-' + d + '-' + String(docHistory.length+1).padStart(3,'0');
-}
+function autoNum() { /* docnum field removed */ }
 
 function buildRecord(fileLinks) {
   fileLinks = fileLinks || [];
@@ -1483,7 +1558,7 @@ function copyOutput() {
 }
 
 function resetAll() {
-  ['project','docnum','title','manager','counterpart','memo','manualLink'].forEach(function(id) {
+  ['project','title','manager','counterpart','memo','manualLink'].forEach(function(id) {
     document.getElementById(id).value = '';
   });
   document.getElementById('direction').value = '내부보고';
@@ -1806,7 +1881,7 @@ function aiVerify() {
 // ---- 메인 탭 ----------------------------------------------------------------
 function switchMainTab(tab) {
   document.querySelectorAll('.main-tab').forEach(function(t, i) {
-    t.classList.toggle('active', ['write','calendar','summary'][i] === tab);
+    t.classList.toggle('active', ['write','calendar','summary','search'][i] === tab);
   });
   document.querySelectorAll('.main-tab-panel').forEach(function(p) {
     p.classList.remove('active');
@@ -1814,6 +1889,7 @@ function switchMainTab(tab) {
   document.getElementById('mainTab-' + tab).classList.add('active');
   if (tab === 'calendar') renderCalendar();
   if (tab === 'summary') { renderSummaryStats(); updateProjFilter(); }
+  if (tab === 'search') { doSearch(); }
 }
 
 // ---- 캘린더 ----------------------------------------------------------------
@@ -1978,6 +2054,12 @@ function updateProjFilter() {
 
 function renderSummaryStats() {
   var recs = getPeriodRecs();
+  var statEl = document.getElementById('summaryStats');
+  var resultEl = document.getElementById('summaryResult');
+  if (!recs.length) {
+    statEl.innerHTML = '<div class="summary-empty" style="grid-column:1/-1">해당 기간에 기록이 없습니다.<br>문서 작성 탭에서 회의록을 전송하면 여기에 표시됩니다.</div>';
+    return;
+  }
   var byType = {};
   var byProject = {};
   recs.forEach(function(r) {
@@ -1986,8 +2068,7 @@ function renderSummaryStats() {
   });
   var topType = Object.keys(byType).sort(function(a,b){return byType[b]-byType[a];})[0]||'-';
   var topProj = Object.keys(byProject).sort(function(a,b){return byProject[b]-byProject[a];})[0]||'-';
-  var labels = {today:'오늘', week:'이번 주', month:'이번 달', year:'올해'};
-  document.getElementById('summaryStats').innerHTML =
+  statEl.innerHTML =
     stat(String(recs.length), '총 문서') +
     stat(String(Object.keys(byProject).length), '프로젝트') +
     stat(topType, '최다 유형') +
@@ -2091,6 +2172,141 @@ function callGemini(prompt, maxTokens) {
   }).catch(function(e) {
     return { ok: false, error: e.message };
   });
+}
+
+
+// ---- 자동완성 ---------------------------------------------------------------
+function getProjectList() {
+  var projs = [];
+  docHistory.forEach(function(r) {
+    if (r.project && projs.indexOf(r.project) < 0) projs.push(r.project);
+  });
+  return projs;
+}
+
+function acInput(input, listId) {
+  var val = input.value.trim().toLowerCase();
+  var list = document.getElementById(listId);
+  if (!val) { list.classList.remove('show'); return; }
+  var projs = getProjectList().filter(function(p) {
+    return p.toLowerCase().indexOf(val) !== -1;
+  });
+  if (!projs.length) { list.classList.remove('show'); return; }
+  list.innerHTML = '';
+  projs.forEach(function(p) {
+    var div = document.createElement('div');
+    div.className = 'autocomplete-item';
+    div.textContent = p;
+    div.dataset.value = p;
+    div.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      document.getElementById('project').value = p;
+      list.classList.remove('show');
+    });
+    list.appendChild(div);
+  });
+  list.classList.add('show');
+}
+
+function acSelect(listId, value) {
+  document.getElementById('project').value = value;
+  acHide(listId);
+}
+
+function acHide(listId) {
+  var el = document.getElementById(listId);
+  if (el) el.classList.remove('show');
+}
+
+function acKey(e, listId) {
+  var list = document.getElementById(listId);
+  var items = list.querySelectorAll('.autocomplete-item');
+  var sel = list.querySelector('.autocomplete-item.selected');
+  var idx = -1;
+  items.forEach(function(it, i) { if (it === sel) idx = i; });
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (sel) sel.classList.remove('selected');
+    var next = items[idx + 1] || items[0];
+    if (next) next.classList.add('selected');
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (sel) sel.classList.remove('selected');
+    var prev = items[idx - 1] || items[items.length - 1];
+    if (prev) prev.classList.add('selected');
+  } else if (e.key === 'Enter') {
+    if (sel) { e.preventDefault(); document.getElementById('project').value = sel.dataset.value || sel.textContent.replace(/<[^>]+>/g,''); acHide(listId); }
+  } else if (e.key === 'Escape') {
+    acHide(listId);
+  }
+}
+
+// ---- 검색 -------------------------------------------------------------------
+function doSearch() {
+  var proj    = (document.getElementById('srchProject').value||'').trim().toLowerCase();
+  var type    = document.getElementById('srchType').value;
+  var author  = (document.getElementById('srchAuthor').value||'').trim().toLowerCase();
+  var dateFrom= document.getElementById('srchDateFrom').value;
+  var dateTo  = document.getElementById('srchDateTo').value;
+  var keyword = (document.getElementById('srchKeyword').value||'').trim().toLowerCase();
+
+  var results = docHistory.filter(function(r) {
+    if (proj && !(r.project||'').toLowerCase().includes(proj)) return false;
+    if (type && r.type !== type) return false;
+    if (author && !(r.author||'').toLowerCase().includes(author)) return false;
+    if (dateFrom && r.date < dateFrom) return false;
+    if (dateTo && r.date > dateTo) return false;
+    if (keyword) {
+      var haystack = ((r.title||'') + ' ' + (r.memo||'') + ' ' + (r.project||'')).toLowerCase();
+      if (!haystack.includes(keyword)) return false;
+    }
+    return true;
+  });
+
+  var countEl = document.getElementById('srchCount');
+  var listEl = document.getElementById('srchResults');
+
+  var hasFilter = proj||type||author||dateFrom||dateTo||keyword;
+  if (!hasFilter) {
+    countEl.textContent = '';
+    listEl.innerHTML = '<div class="search-empty">검색 조건을 입력하면 결과가 표시됩니다</div>';
+    return;
+  }
+
+  countEl.textContent = '검색 결과: ' + results.length + '건';
+
+  if (!results.length) {
+    listEl.innerHTML = '<div class="search-empty">검색 결과가 없습니다</div>';
+    return;
+  }
+
+  var TC = {'공문':'#1A9E74','계약서':'#185FA5','견적서':'#BA7517','회의록':'#534AB7',
+    '협의사항':'#5A8F22','녹취자료':'#993C1D','기타':'#888780','내부보고':'#888780'};
+
+  listEl.innerHTML = results.map(function(r, i) {
+    var idx = docHistory.indexOf(r);
+    var color = TC[r.type] || '#888';
+    return '<div class="search-result-item" onclick="showSearchResult(' + idx + ')">'
+      + '<div style="width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0"></div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (r.title||'') + '</div>'
+      + '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'
+      + (r.date||'') + ' &middot; ' + (r.type||'') + ' &middot; ' + (r.project||'') + (r.author?' &middot; '+r.author:'')
+      + '</div></div>'
+      + '<span style="font-size:11px;color:var(--green);font-weight:600;flex-shrink:0">보기</span>'
+      + '</div>';
+  }).join('');
+}
+
+function showSearchResult(idx) {
+  var r = docHistory[idx];
+  if (!r) return;
+  switchMainTab('write');
+  var out = document.getElementById('output');
+  out.classList.remove('empty');
+  out.textContent = r.text;
+  navigator.clipboard.writeText(r.text).catch(function(){});
+  showToast(r.title + ' 기록을 복사했습니다');
 }
 
 function showToast(msg) {
