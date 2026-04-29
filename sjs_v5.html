@@ -477,30 +477,28 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
     <div class="field"><label>날짜 *</label><input type="date" id="date"></div>
     <div class="field"><label>수발신 구분 *</label>
       <select id="direction">
+        <option value="내부보고">내부보고</option>
         <option value="수신">수신 (받음)</option>
         <option value="발신">발신 (보냄)</option>
-        <option value="내부">내부</option>
       </select>
     </div>
     <div class="field full"><label>프로젝트명 *</label><input type="text" id="project" placeholder="프로젝트명 입력"></div>
     <div class="field full"><label>문서번호</label>
       <div class="docnum-row">
         <input type="text" id="docnum" placeholder="예) SJS-202605-001">
-        <button class="auto-btn" onclick="autoNum()">자동생성</button>
-      </div>
     </div>
     <div class="field full"><label>제목 *</label><input type="text" id="title" placeholder="문서 제목 입력"></div>
     <div class="field full"><label>문서 유형</label>
       <div class="type-wrap">
-        <div class="type-btn on" onclick="pickType(this)">공문</div>
+        <div class="type-btn on" onclick="pickType(this)">회의록</div>
+        <div class="type-btn" onclick="pickType(this)">협의사항</div>
+        <div class="type-btn" onclick="pickType(this)">공문</div>
         <div class="type-btn" onclick="pickType(this)">계약서</div>
         <div class="type-btn" onclick="pickType(this)">견적서</div>
         <div class="type-btn" onclick="pickType(this)">수발신 메일</div>
-        <div class="type-btn" onclick="pickType(this)">회의록</div>
-        <div class="type-btn" onclick="pickType(this)">협의사항</div>
         <div class="type-btn" onclick="pickType(this)">녹취자료</div>
         <div class="type-btn" onclick="pickType(this)">기타</div>
-      </div>
+      </div>>
     </div>
   </div>
 </div>
@@ -509,7 +507,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
   <div class="sec-label">참여자 정보</div>
   <div class="grid">
     <div class="field"><label>작성자</label><input type="text" id="manager" placeholder="내부 담당자"></div>
-    <div class="field"><label>상대방 / 기관</label><input type="text" id="counterpart" placeholder="발신처 또는 수신처"></div>
+    <div class="field"><label>경영진 / 상대방 / 기관</label><input type="text" id="counterpart" placeholder="경영진 또는 상대방/기관명"></div>
     <div class="field full"><label>참석자</label>
       <div class="att-row">
         <input type="text" id="attInput" placeholder="이름 또는 소속 입력 후 추가" onkeydown="if(event.key==='Enter'){event.preventDefault();addAtt()}">
@@ -715,7 +713,7 @@ function fmtSize(b) {
   return (b/1048576).toFixed(1) + 'MB';
 }
 
-var selType = '공문';
+var selType = '회의록';
 var lastSentKey = '';
 var pendingResend = false;
 var editTargetIdx = -1;
@@ -806,6 +804,7 @@ function loadCfg() {
   var urlBotToken     = params.get('bt');
   var urlChatId       = params.get('ci');
   var urlAdminPw      = params.get('pw');
+  var urlGeminiKey    = params.get('gk');
 
   if (urlClientId)     cfg.clientId     = urlClientId;
   if (urlClientSecret) cfg.clientSecret = urlClientSecret;
@@ -813,6 +812,7 @@ function loadCfg() {
   if (urlBotToken)     cfg.botToken     = urlBotToken;
   if (urlChatId)       cfg.chatId       = urlChatId;
   if (urlAdminPw)      cfg.adminPw      = urlAdminPw;
+  if (urlGeminiKey)    cfg.geminiKey    = urlGeminiKey;
 
   // URL 파라미터가 있으면 자동 저장
   if (urlClientId || urlBotToken || urlFolderId) {
@@ -875,7 +875,8 @@ function generateShareUrl() {
     + '&fid=' + encodeURIComponent(cfg.folderId)
     + '&bt='  + encodeURIComponent(cfg.botToken)
     + '&ci='  + encodeURIComponent(cfg.chatId)
-    + (cfg.adminPw ? '&pw=' + encodeURIComponent(cfg.adminPw) : '');
+    + (cfg.adminPw ? '&pw=' + encodeURIComponent(cfg.adminPw) : '')
+    + (cfg.geminiKey ? '&gk=' + encodeURIComponent(cfg.geminiKey) : '');
 
   navigator.clipboard.writeText(url).then(function() {
     showToast('배포 URL이 복사됐습니다! 팀원들에게 이 링크를 공유하세요');
@@ -1134,7 +1135,7 @@ function buildRecord(fileLinks) {
   t += '\uD83D\uDDC2 유형: ' + selType + '\n';
   t += '\n';
   if (mgr) t += '\uD83D\uDC64 작성자: ' + mgr + '\n';
-  if (cp) t += '\uD83C\uDFE2 상대방/기관: ' + cp + '\n';
+  if (cp) t += '\uD83C\uDFE2 경영진/상대방/기관: ' + cp + '\n';
   if (attendees.length) t += '\uD83D\uDC65 참석자: ' + attendees.join(', ') + '\n';
   if (memo) {
     t += '\n';
@@ -1487,7 +1488,7 @@ function resetAll() {
   ['project','docnum','title','manager','counterpart','memo','manualLink'].forEach(function(id) {
     document.getElementById(id).value = '';
   });
-  document.getElementById('direction').value = '수신';
+  document.getElementById('direction').value = '내부보고';
   updateCharCount(0);
   attendees = []; renderTags();
   attachedFiles = []; renderFiles();
