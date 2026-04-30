@@ -354,8 +354,8 @@ textarea{resize:vertical;line-height:1.65}
         <input type="text" id="editPwAuthor" placeholder="원본 작성자 성함+직위 입력">
       </div>
       <div class="modal-field">
-        <label>수정 비밀번호</label>
-        <input type="password" id="editPwInput" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkEditPw()">
+        <label>비밀번호 <span style="font-size:10px;color:var(--text-3)">(작성 시 입력한 4자리 또는 관리자 비밀번호)</span></label>
+        <input type="password" id="editPwInput" placeholder="작성 시 입력한 비밀번호" onkeydown="if(event.key==='Enter')checkEditPw()">
       </div>
       <div class="modal-err" id="editPwErr">작성자 또는 비밀번호가 올바르지 않습니다.</div>
       <div class="modal-btns">
@@ -506,6 +506,7 @@ textarea{resize:vertical;line-height:1.65}
   <div class="grid">
     <div class="field"><label>작성자 *</label><input type="text" id="manager" placeholder="성함 + 직위/직책 (예: 홍길동 부장)"></div>
     <div class="field"><label>소속 / 부서</label><input type="text" id="dept" placeholder="소속 또는 부서명"></div>
+    <div class="field"><label>작성자 비밀번호 <span style="font-size:10px;color:var(--text-3)">(4자리 - 수정 시 필요)</span></label><input type="password" id="authorPw" maxlength="4" placeholder="0000" style="letter-spacing:0.3em;font-size:18px" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"></div>
   </div>
   <div style="margin-top:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -1255,7 +1256,7 @@ function doSubmit(){
           });
         }
         return sendTelegram(finalText+(textLink?'\nDrive: '+textLink:'')).then(function(){
-          tick(); saveVersion(finalText,'전송 완료'); lastSentKey=buildSentKey();
+          tick(); var recPw=gv('authorPw')||'0000'; saveVersion(finalText,'전송 완료',gv('authorPw')||''); lastSentKey=buildSentKey();
           setProgress(100); setTimeout(function(){setProgress(0);},1200);
           btn.disabled=false; btn.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:3px"><span style="font-size:15px;font-weight:700">회의록 전송</span><span style="font-size:10px;font-weight:400;opacity:0.85">저장 &middot; Drive &middot; 텔레그램 &middot; Sheets</span></div>';
           showSentBanner(date,project,gv('title'),selType,author,textLink);
@@ -1290,7 +1291,7 @@ function confirmResend(){ document.getElementById('resendBanner').classList.remo
 function copyOutput(){ var t=document.getElementById('output').textContent; if(!t||t.indexOf('위 항목을')===0){showToast('먼저 기록을 생성하세요');return;} navigator.clipboard.writeText(t).then(function(){showToast('복사됐습니다');}).catch(function(){}); }
 
 function resetAll(){
-  ['project','title','manager','dept','location','meetTime','memo','discussion','special','manualLink'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  ['project','title','manager','dept','location','meetTime','memo','discussion','special','manualLink','authorPw'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('direction').value='내부보고';
   document.querySelectorAll('.type-btn').forEach(function(b){b.classList.remove('on');}); document.querySelector('.type-btn').classList.add('on'); selType='회의록';
   attendees=[]; renderAttDetails(); attachedFiles=[]; renderFiles();
@@ -1394,9 +1395,20 @@ function openEditModal(idx){ editTargetIdx=idx; var rec=docHistory[idx]; documen
 
 function checkEditPw(){
   var rec=docHistory[editTargetIdx];
-  if(document.getElementById('editPwAuthor').value.trim()===rec.author&&document.getElementById('editPwInput').value===(cfg.editPw||'sjs2026')){
-    document.getElementById('editPwErr').style.display='none'; document.getElementById('editPwStep').style.display='none'; document.getElementById('editContentStep').style.display='block'; document.getElementById('editMemoInput').value=rec.memo||''; document.getElementById('editReason').value='';
-  } else { document.getElementById('editPwErr').style.display='block'; document.getElementById('editPwInput').value=''; }
+  var inputAuthor=document.getElementById('editPwAuthor').value.trim();
+  var inputPw=document.getElementById('editPwInput').value;
+  // 작성자 비밀번호(authorPw) 우선, 없으면 시스템 비밀번호
+  var validPw = rec.authorPw || (cfg.editPw||'sjs2026');
+  if(inputAuthor===rec.author && inputPw===validPw){
+    document.getElementById('editPwErr').style.display='none';
+    document.getElementById('editPwStep').style.display='none';
+    document.getElementById('editContentStep').style.display='block';
+    document.getElementById('editMemoInput').value=rec.memo||'';
+    document.getElementById('editReason').value='';
+  } else {
+    document.getElementById('editPwErr').style.display='block';
+    document.getElementById('editPwInput').value='';
+  }
 }
 
 function saveEdit(){
@@ -1454,7 +1466,7 @@ function renderActionItems(){
 }
 
 // -- 2단계: 버전 관리 ---------------------------------------------------------
-function saveVersion(text, reason){ var ver=docVersions.length+1; docVersions.push({ver,text,reason:reason||'',ts:new Date().toLocaleString('ko-KR')}); renderVersions(); }
+function saveVersion(text, reason, authorPw){ var ver=docVersions.length+1; docVersions.push({ver,text,reason:reason||'',authorPw:authorPw||'',ts:new Date().toLocaleString('ko-KR')}); renderVersions(); }
 
 function renderVersions(){
   var list=document.getElementById('versionList'), count=document.getElementById('versionCount');
@@ -1486,7 +1498,7 @@ function loadLinkedMeetings(){
     var color=TYPE_COLORS[r.type]||'#888';
     var div=document.createElement('div'); div.className='linked-item';
     div.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.title||'')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(r.date||'')+' &middot; '+(r.type||'')+(r.author?' &middot; '+r.author:'')+'</div></div><span style="font-size:11px;color:var(--green);font-weight:600">보기</span>';
-    div.onclick=(function(ri){return function(){var rec=list._linked&&list._linked[ri];if(!rec)return;var out=document.getElementById('output');out.classList.remove('empty');out.textContent=rec.text||rec.title;navigator.clipboard.writeText(out.textContent).catch(function(){});showToast(rec.title+' 기록을 복사했습니다');};})(i);
+    div.onclick=(function(ri){return function(){var rec=list._linked&&list._linked[ri];if(rec)showRecordDetail(rec);};})(i);
     list.appendChild(div);
   });
 }
@@ -1591,7 +1603,7 @@ function selectCalDay(dateStr, recs){
     var color=TYPE_COLORS[r.type]||'#888';
     var div=document.createElement('div'); div.className='cal-detail-item';
     div.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.title||'')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(r.type||'')+' &middot; '+(r.project||'')+(r.author?' &middot; '+r.author:'')+'</div></div><span style="font-size:11px;color:var(--green);font-weight:600">보기</span>';
-    div.onclick=function(){ var out=document.getElementById('output'); out.classList.remove('empty'); out.textContent=r.text||r.title; switchMainTab('write'); navigator.clipboard.writeText(out.textContent).catch(function(){}); showToast(r.title+' 기록을 복사했습니다'); };
+    div.onclick=(function(rec){ return function(){ showRecordDetail(rec); }; })(r);
     listEl.appendChild(div);
   });
 }
@@ -1665,9 +1677,45 @@ function doSearch(){
     var color=TYPE_COLORS[r.type]||'#888';
     var div=document.createElement('div'); div.className='search-result-item';
     div.innerHTML='<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(r.title||'')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(r.date||'')+' &middot; '+(r.type||'')+' &middot; '+(r.project||'')+(r.author?' &middot; '+r.author:'')+'</div></div><span style="font-size:11px;color:var(--green);font-weight:600">보기</span>';
-    div.onclick=function(){ var out=document.getElementById('output'); out.classList.remove('empty'); out.textContent=r.text||r.title; switchMainTab('write'); navigator.clipboard.writeText(out.textContent).catch(function(){}); showToast(r.title+' 기록을 복사했습니다'); };
+    div.onclick=(function(rec){ return function(){ showRecordDetail(rec); }; })(r);
     listEl.appendChild(div);
   });
+}
+
+// ---- 기록 상세 보기 ----------------------------------------------------------
+function buildFullText(r) {
+  if (r.text && r.text.length > 100) return r.text;
+  var t = '';
+  t += '수발신 문서 기록\n------------------\n\n';
+  t += '날짜: ' + (r.date||'') + '\n';
+  t += '구분: ' + (r.direction||'') + '\n';
+  t += '프로젝트: ' + (r.project||'') + '\n';
+  t += '제목: ' + (r.title||'') + '\n';
+  t += '유형: ' + (r.type||'') + '\n\n';
+  if (r.author) t += '작성자: ' + r.author + '\n';
+  if (r.attendees && r.attendees.length) {
+    t += '참석자: ';
+    t += Array.isArray(r.attendees) ? r.attendees.join(', ') : r.attendees;
+    t += '\n';
+  }
+  if (r.memo) {
+    t += '\n회의 내용:\n';
+    t += r.memo.split('\n').map(function(l){return '   '+l;}).join('\n') + '\n';
+  }
+  if (r.driveLink) t += '\n저장 위치: ' + r.driveLink + '\n';
+  t += '\n------------------\n';
+  t += '기록시각: ' + (r.ts ? (typeof r.ts === 'number' ? new Date(r.ts).toLocaleString('ko-KR') : r.ts) : '');
+  return t;
+}
+
+function showRecordDetail(r) {
+  var fullText = buildFullText(r);
+  var out = document.getElementById('output');
+  out.classList.remove('empty');
+  out.textContent = fullText;
+  switchMainTab('write');
+  navigator.clipboard.writeText(fullText).catch(function(){});
+  showToast((r.title||'기록') + ' 내용을 불러왔습니다');
 }
 
 // -- 토스트 -------------------------------------------------------------------
