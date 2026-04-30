@@ -383,13 +383,13 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 <div class="edit-modal-overlay" id="editModal">
   <div class="edit-modal">
     <div class="edit-modal-title">&#9998; 회의록 수정</div>
-    <div class="edit-modal-sub" id="editModalSub">본인이 작성한 기록만 수정할 수 있습니다.</div>
+    <div class="edit-modal-sub" id="editModalSub">본인이 작성한 기록만 수정할 수 있습니다. (성함+직위로 확인)</div>
 
     <!-- 비밀번호 단계 -->
     <div id="editPwStep">
       <div class="edit-field">
         <label>작성자 이름 확인</label>
-        <input type="text" id="editPwAuthor" placeholder="원본 작성자 이름 입력">
+        <input type="text" id="editPwAuthor" placeholder="원본 작성자 성함+직위 입력">
       </div>
       <div class="edit-field">
         <label>수정 비밀번호 (작성 시 사용한 비밀번호)</label>
@@ -609,7 +609,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 <div class="card">
   <div class="sec-label">참여자 정보</div>
   <div class="grid">
-    <div class="field"><label>작성자 *</label><input type="text" id="manager" placeholder="작성자 이름"></div>
+    <div class="field"><label>작성자 *</label><input type="text" id="manager" placeholder="성함 + 직위/직책 (예: 홍길동 부장)"></div>
     <div class="field"><label>소속 / 부서</label><input type="text" id="dept" placeholder="소속 또는 부서명"></div>
   </div>
   <div style="margin-top:12px">
@@ -869,7 +869,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
     </div>
     <div class="search-field">
       <label>작성자</label>
-      <input type="text" id="srchAuthor" placeholder="작성자 이름" oninput="doSearch()">
+      <input type="text" id="srchAuthor" placeholder="성함 또는 직위" oninput="doSearch()">
     </div>
     <div class="search-field">
       <label>날짜 (시작)</label>
@@ -1358,7 +1358,7 @@ function renderAttDetails() {
     grid.className = 'att-detail-grid';
     var fields = [
       {key:'org', label:'소속 *', type:'text', ph:'소속/기관명'},
-      {key:'name', label:'이름 *', type:'text', ph:'성명'},
+      {key:'name', label:'성함+직위 *', type:'text', ph:'홍길동 부장'},
       {key:'email', label:'이메일', type:'email', ph:'이메일 주소'},
       {key:'tel', label:'연락처', type:'tel', ph:'010-0000-0000'}
     ];
