@@ -343,7 +343,37 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
 .sign-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
 .sign-org{font-size:11px;color:var(--text-3);margin-bottom:16px}
 .sign-line{border-top:0.5px solid var(--border);padding-top:6px;font-size:10px;color:var(--text-3)}
+
+/* 2단계 기능 */
+.v2-panel{background:var(--card);border-radius:14px;border:0.5px solid var(--border);margin-bottom:14px}
+.v2-head{padding:14px 18px;border-bottom:0.5px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.v2-head:hover{background:var(--bg)}
+.v2-body{padding:16px 18px;display:none}
+.v2-body.open{display:block}
+.action-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:6px}
+.action-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
+.action-text{flex:1;font-size:13px}
+.action-text.done{text-decoration:line-through;color:var(--text-3)}
+.action-due{font-size:11px;color:var(--text-3);white-space:nowrap}
+.action-due.overdue{color:var(--red);font-weight:600}
+.action-del{cursor:pointer;color:var(--text-3);font-size:16px}
+.action-del:hover{color:var(--red)}
+.action-add-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;margin-top:8px}
+.action-add-row input{font-family:'Noto Sans KR',sans-serif;font-size:13px;background:var(--bg);border:0.5px solid var(--border);border-radius:7px;padding:7px 10px;outline:none}
+.action-add-row input:focus{border-color:var(--green)}
+.version-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px}
+.version-badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.v-current{background:var(--green-light);color:var(--green-dark)}
+.v-old{background:#F1EFE8;color:var(--text-2)}
+.version-meta{flex:1;min-width:0}
+.version-title{font-size:12px;font-weight:500}
+.version-time{font-size:11px;color:var(--text-3)}
+.linked-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px;cursor:pointer}
+.linked-item:hover{background:var(--border-light)}
+.pdf-gen-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;background:#C0392B;color:#fff;border:none;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer}
+.pdf-gen-btn:hover{background:#922b21}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -556,7 +586,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
         <input type="text" id="project" placeholder="프로젝트명 입력" autocomplete="off"
           oninput="acInput(this,'project-ac')"
           onkeydown="acKey(event,'project-ac')"
-          onblur="setTimeout(function(){acHide('project-ac')},200)">
+          onblur="setTimeout(function(){acHide('project-ac')},200)" onchange="loadLinkedMeetings()">
         <div class="autocomplete-list" id="project-ac"></div>
       </div>
     </div>
@@ -713,6 +743,41 @@ textarea{resize:vertical;min-height:80px;line-height:1.65}
     <button class="btn ghost" onclick="toggleSharePanel()">&#128231; 외부 공유</button>
     <button class="btn ghost" onclick="copyOutput()">&#128203; 텍스트 복사</button>
     <button class="btn ghost" onclick="resetAll()">&#8635; 초기화</button>
+  </div>
+</div>
+
+
+<div class="v2-panel" id="actionPanel">
+  <div class="v2-head" onclick="toggleV2('actionPanel')">
+    <div class="sec-label" style="margin:0">&#128204; &#D6C4;&#C18D; &#C870;&#CE58; (Action Items)</div>
+    <span id="actionCount" style="font-size:12px;color:var(--text-3)">0&#AC74;</span>
+  </div>
+  <div class="v2-body" id="actionBody">
+    <div id="actionList"></div>
+    <div class="action-add-row">
+      <input type="text" id="actionInput" placeholder="&#C870;&#CE58; &#B0B4;&#C6A9; &#C785;&#B825;" onkeydown="if(event.key==='Enter')addActionItem()">
+      <input type="text" id="actionAssignee" placeholder="&#B2F4;&#B2F9;&#C790;">
+      <input type="date" id="actionDue">
+      <button class="add-btn" onclick="addActionItem()">+ &#CD94;&#AC00;</button>
+    </div>
+  </div>
+</div>
+<div class="v2-panel" id="versionPanel">
+  <div class="v2-head" onclick="toggleV2('versionPanel')">
+    <div class="sec-label" style="margin:0">&#128196; &#BC84;&#C804; &#AD00;&#B9AC;</div>
+    <span id="versionCount" style="font-size:12px;color:var(--text-3)">v1</span>
+  </div>
+  <div class="v2-body" id="versionBody">
+    <div id="versionList"></div>
+  </div>
+</div>
+<div class="v2-panel" id="linkedPanel">
+  <div class="v2-head" onclick="toggleV2('linkedPanel')">
+    <div class="sec-label" style="margin:0">&#128279; &#C774;&#C804; &#D68C;&#C758; &#C5F0;&#ACB0;</div>
+    <span style="font-size:12px;color:var(--text-3)">&#B3D9;&#C77C; &#D504;&#B85C;&#C81D;&#D2B8; &#C774;&#C804; &#AE30;&#B85D;</span>
+  </div>
+  <div class="v2-body" id="linkedBody">
+    <div id="linkedList"></div>
   </div>
 </div>
 
@@ -1680,6 +1745,7 @@ function doSubmit() {
           setTimeout(function() { setProgress(0); }, 1200);
           btn.disabled = false;
           btn.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:3px"><span style="font-size:15px;font-weight:700">회의록 전송</span><span style="font-size:10px;font-weight:400;opacity:0.85">저장 &middot; Drive 업로드 &middot; 텔레그램 발송</span></div>';
+          saveVersion(finalText, '');
           lastSentKey = buildSentKey();
           showSentBanner(gv('date'), gv('project'), gv('title'), selType, gv('manager'), textLink);
           showToast('전송이 완료됐습니다!');
@@ -1736,6 +1802,8 @@ function resetAll() {
   out.classList.add('empty'); out.textContent = '위 항목을 입력한 뒤 [저장 + 발송] 버튼을 누르세요.';
   clearLog(); hideSentBanner(); lastSentKey = ''; pendingResend = false;
   closeAiResult();
+  actionItems = []; renderActionItems();
+  docVersions = []; renderVersions();
   document.getElementById('verifyWrap').classList.remove('show');
   document.getElementById('verifyWrap').innerHTML = '';
   document.getElementById('resendBanner').classList.remove('show');
@@ -2700,6 +2768,287 @@ function generateAiMail() {
     }
   });
 }
+
+
+// ---- 2단계: 후속 조치 추적 --------------------------------------------------
+var actionItems = [];
+
+function toggleV2(id) {
+  var body = document.getElementById(id.replace('Panel','Body'));
+  if (body) body.classList.toggle('open');
+}
+
+function addActionItem() {
+  var inp = document.getElementById('actionInput');
+  var assignee = document.getElementById('actionAssignee');
+  var due = document.getElementById('actionDue');
+  var text = inp.value.trim();
+  if (!text) { showToast('조치 내용을 입력하세요'); return; }
+  actionItems.push({ text:text, assignee:assignee.value.trim(), due:due.value, done:false, id:Date.now() });
+  inp.value=''; assignee.value=''; due.value='';
+  renderActionItems();
+  inp.focus();
+}
+
+function toggleActionDone(id) {
+  var item = actionItems.find(function(a){ return a.id===id; });
+  if (item) { item.done=!item.done; renderActionItems(); }
+}
+
+function removeActionItem(id) {
+  actionItems = actionItems.filter(function(a){ return a.id!==id; });
+  renderActionItems();
+}
+
+function renderActionItems() {
+  var list = document.getElementById('actionList');
+  var count = document.getElementById('actionCount');
+  if (!list) return;
+  var done = actionItems.filter(function(a){ return a.done; }).length;
+  if (count) count.textContent = done+'/'+actionItems.length+'건 완료';
+  if (!actionItems.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:6px 0">후속 조치를 추가하세요</div>';
+    return;
+  }
+  var today = new Date().toISOString().split('T')[0];
+  list.innerHTML = '';
+  actionItems.forEach(function(item) {
+    var isOverdue = item.due && item.due < today && !item.done;
+    var div = document.createElement('div');
+    div.className = 'action-item';
+    var cb = document.createElement('input');
+    cb.type='checkbox'; cb.checked=item.done;
+    cb.onchange = (function(id){ return function(){ toggleActionDone(id); }; })(item.id);
+    var td = document.createElement('div');
+    td.className = 'action-text'+(item.done?' done':'');
+    td.textContent = item.text+(item.assignee?' ['+item.assignee+']':'');
+    var dd = document.createElement('div');
+    dd.className = 'action-due'+(isOverdue?' overdue':'');
+    dd.textContent = item.due||'';
+    var del = document.createElement('span');
+    del.className='action-del'; del.innerHTML='&#215;';
+    del.onclick=(function(id){ return function(){ removeActionItem(id); }; })(item.id);
+    div.appendChild(cb); div.appendChild(td); div.appendChild(dd); div.appendChild(del);
+    list.appendChild(div);
+  });
+}
+
+// ---- 2단계: 버전 관리 --------------------------------------------------------
+var docVersions = [];
+
+function saveVersion(text, reason) {
+  var ver = docVersions.length+1;
+  docVersions.push({ ver:ver, text:text, reason:reason||'', ts:new Date().toLocaleString('ko-KR') });
+  renderVersions();
+}
+
+function renderVersions() {
+  var list = document.getElementById('versionList');
+  var count = document.getElementById('versionCount');
+  if (!list) return;
+  if (count) count.textContent = 'v'+docVersions.length;
+  if (!docVersions.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-3)">전송 시 자동으로 버전이 생성됩니다</div>';
+    return;
+  }
+  list.innerHTML = '';
+  docVersions.slice().reverse().forEach(function(v, i) {
+    var isCurrent = (i===0);
+    var div = document.createElement('div');
+    div.className = 'version-item';
+    var badge = document.createElement('span');
+    badge.className = 'version-badge '+(isCurrent?'v-current':'v-old');
+    badge.textContent = 'v'+v.ver+(isCurrent?' (최신)':'');
+    var meta = document.createElement('div');
+    meta.className = 'version-meta';
+    meta.innerHTML = '<div class="version-title">'+(v.reason||'원본')+'</div><div class="version-time">'+v.ts+'</div>';
+    var btn = document.createElement('button');
+    btn.className='add-btn'; btn.style.fontSize='11px'; btn.textContent='복원';
+    var realIdx = docVersions.length-1-i;
+    btn.onclick=(function(ri){ return function(){ restoreVersion(ri); }; })(realIdx);
+    div.appendChild(badge); div.appendChild(meta); div.appendChild(btn);
+    list.appendChild(div);
+  });
+}
+
+function restoreVersion(idx) {
+  var v = docVersions[idx];
+  if (!v) return;
+  var out = document.getElementById('output');
+  out.classList.remove('empty');
+  out.textContent = v.text;
+  navigator.clipboard.writeText(v.text).catch(function(){});
+  showToast('v'+v.ver+' 버전으로 복원됐습니다');
+}
+
+// ---- 2단계: 이전 회의 연결 --------------------------------------------------
+function loadLinkedMeetings() {
+  var proj = gv('project');
+  var list = document.getElementById('linkedList');
+  if (!list) return;
+  if (!proj) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-3)">프로젝트명을 입력하면 이전 회의록이 표시됩니다</div>';
+    return;
+  }
+  var src = sheetsDocHistory || docHistory;
+  var linked = src.filter(function(r){ return r.project===proj && r.title!==gv('title'); }).slice(0,10);
+  if (!linked.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-3)">['+proj+'] 이전 회의록이 없습니다</div>';
+    return;
+  }
+  var TC = {'회의록':'#534AB7','협의사항':'#5A8F22','공문':'#1A9E74','계약서':'#185FA5','견적서':'#BA7517','기타':'#888780'};
+  list._linked = linked;
+  list.innerHTML = '';
+  linked.forEach(function(r, i) {
+    var color = TC[r.type]||'#888';
+    var div = document.createElement('div');
+    div.className = 'linked-item';
+    div.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r.title+'</div>'
+      +'<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+r.date+' &middot; '+(r.type||'')+(r.author?' &middot; '+r.author:'')+'</div></div>'
+      +'<span style="font-size:11px;color:var(--green);font-weight:600">보기</span>';
+    div.onclick=(function(ri){ return function(){ showLinkedDetail(ri); }; })(i);
+    list.appendChild(div);
+  });
+}
+
+function showLinkedDetail(i) {
+  var list = document.getElementById('linkedList');
+  var r = list._linked && list._linked[i];
+  if (!r) return;
+  var out = document.getElementById('output');
+  out.classList.remove('empty');
+  out.textContent = r.text||r.title;
+  navigator.clipboard.writeText(out.textContent).catch(function(){});
+  showToast(r.title+' 기록을 복사했습니다');
+}
+
+// ---- 2단계: PDF 출력 --------------------------------------------------------
+function generatePDF() {
+  var rec = buildRecord();
+  if (!rec) { showToast('먼저 회의록을 작성하세요'); return; }
+  var title = gv('title')||'회의록';
+  var date = gv('date')||'';
+  try {
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var pageW = doc.internal.pageSize.getWidth();
+    var pageH = doc.internal.pageSize.getHeight();
+    var margin = 20;
+    var y = margin;
+
+    doc.setFillColor(26,158,116);
+    doc.rect(0,0,pageW,12,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(9);
+    doc.text('SANGJISEOUL | SJS DOCUMENT RECORD', margin, 8);
+    doc.text(date, pageW-margin, 8, {align:'right'});
+
+    y = 24;
+    doc.setTextColor(28,27,24);
+    doc.setFontSize(18);
+    doc.setFont(undefined,'bold');
+    var titleLines = doc.splitTextToSize(title, pageW-margin*2);
+    doc.text(titleLines, margin, y);
+    y += titleLines.length*8+4;
+
+    doc.setDrawColor(26,158,116);
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, pageW-margin, y);
+    y += 6;
+
+    doc.setFontSize(10);
+    doc.setFont(undefined,'normal');
+    doc.setTextColor(28,27,24);
+
+    var lines = rec.split('\n');
+    lines.forEach(function(line) {
+      if (y > pageH-30) { doc.addPage(); y=margin+10; }
+      var cl = line.replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u2500-\u257F]/g,'-').trim();
+      if (!cl) { y+=4; return; }
+      var wrapped = doc.splitTextToSize(cl, pageW-margin*2);
+      doc.text(wrapped, margin, y);
+      y += wrapped.length*5+1;
+    });
+
+    if (actionItems.length) {
+      y+=6;
+      if (y>pageH-50){ doc.addPage(); y=margin+10; }
+      doc.setFillColor(230,247,241);
+      doc.rect(margin, y-4, pageW-margin*2, 8,'F');
+      doc.setFont(undefined,'bold');
+      doc.text('[ ACTION ITEMS ]', margin+2, y+2);
+      y+=10;
+      doc.setFont(undefined,'normal');
+      actionItems.forEach(function(item) {
+        if (y>pageH-20){ doc.addPage(); y=margin+10; }
+        var s = (item.done?'[완료] ':'[ ] ')+item.text+(item.assignee?' ('+item.assignee+')':'')+(item.due?' ~ '+item.due:'');
+        var w2 = doc.splitTextToSize(s, pageW-margin*2);
+        doc.text(w2, margin, y);
+        y+=w2.length*5+2;
+      });
+    }
+
+    var sigY = pageH-40;
+    doc.setDrawColor(200,200,200);
+    doc.setLineWidth(0.3);
+    doc.line(margin, sigY, pageW-margin, sigY);
+    doc.setFontSize(8);
+    doc.setTextColor(150,150,150);
+    doc.text('서명란', margin, sigY+5);
+
+    var signers = [];
+    var author = gv('manager');
+    if (author) signers.push({name:author, org:gv('dept')||'상지서울'});
+    attendees.forEach(function(a){ if(a.name) signers.push({name:a.name,org:a.org||''}); });
+    var sigW = (pageW-margin*2)/Math.max(signers.length,1);
+    signers.slice(0,4).forEach(function(s,i) {
+      var sx = margin+i*sigW;
+      doc.setTextColor(50,50,50);
+      doc.setFontSize(9);
+      doc.text(s.name, sx+2, sigY+12);
+      doc.setFontSize(8);
+      doc.setTextColor(150,150,150);
+      doc.text(s.org, sx+2, sigY+17);
+      doc.setDrawColor(180,180,180);
+      doc.rect(sx+sigW-22, sigY+8, 18, 16);
+      doc.setFontSize(7);
+      doc.text('(인)', sx+sigW-13, sigY+18, {align:'center'});
+    });
+
+    doc.setFillColor(245,244,240);
+    doc.rect(0, pageH-8, pageW, 8,'F');
+    doc.setTextColor(150,150,150);
+    doc.setFontSize(7);
+    doc.text('상지서울 | 수발신 문서 기록 시스템 | 대외비', pageW/2, pageH-3, {align:'center'});
+
+    var filename = (date||'record')+'_'+title.slice(0,20)+'.pdf';
+    doc.save(filename);
+    showToast('PDF가 다운로드됐습니다');
+  } catch(e) {
+    showToast('PDF 생성 오류: '+e.message);
+  }
+}
+
+// ---- 서명 요청 메일 ----------------------------------------------------------
+function requestSignature() {
+  var title = gv('title')||'회의록';
+  var date = gv('date')||'';
+  var emails = attendees.filter(function(a){return a.email;}).map(function(a){return a.email;}).join(',');
+  var author = gv('manager')||'담당자';
+  var body = '[서명 요청] '+title+' ('+date+')\n\n안녕하세요.\n\n'
+    +author+'입니다.\n\n'
+    +'첨부된 회의록 내용을 확인하시고 서명 후 회신 부탁드립니다.\n\n'
+    +'회의록 제목: '+title+'\n'
+    +'회의 일자: '+date+'\n\n'
+    +'감사합니다.\n'+author+' 드림';
+  var mailUrl = 'mailto:'+emails
+    +'?subject='+encodeURIComponent('[서명요청][상지서울] '+title)
+    +'&body='+encodeURIComponent(body);
+  window.open(mailUrl);
+  showToast('서명 요청 메일이 준비됐습니다');
+}
+
 
 function showToast(msg) {
   var t = document.getElementById('toast');
