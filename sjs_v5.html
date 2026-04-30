@@ -1748,7 +1748,23 @@ function doSubmit() {
           saveVersion(finalText, '');
           lastSentKey = buildSentKey();
           showSentBanner(gv('date'), gv('project'), gv('title'), selType, gv('manager'), textLink);
-          showToast('전송이 완료됐습니다!');
+
+          // 참석자 이메일이 있으면 이메일 앱 자동 실행
+          var emailList = attendees.filter(function(a){ return a.email; }).map(function(a){ return a.email; });
+          if (emailList.length > 0) {
+            setTimeout(function() {
+              var subject = '[상지서울] ' + gv('title') + ' (' + gv('date') + ')';
+              var body = finalText + (textLink ? '\n\nDrive 링크: ' + textLink : '');
+              var mailUrl = 'mailto:' + emailList.join(',')
+                + '?subject=' + encodeURIComponent(subject)
+                + '&body=' + encodeURIComponent(body);
+              window.open(mailUrl);
+              showToast('이메일 앱이 실행됩니다. 내용 확인 후 발송하세요.');
+            }, 800);
+          } else {
+            showToast('전송이 완료됐습니다!');
+          }
+
           // 3초 후 자동 초기화
           setTimeout(function() { resetAll(); }, 3000);
         });
@@ -2683,8 +2699,20 @@ function toggleSharePanel() {
   var panel = document.getElementById('sharePanel');
   var isOpen = panel.classList.contains('open');
   if (!isOpen) {
+    // 1순위: 폼에서 직접 생성
     var rec = buildRecord();
-    if (!rec) { showToast('먼저 내용을 입력하세요'); return; }
+    // 2순위: output box에 있는 기존 기록 사용
+    if (!rec) {
+      var outEl = document.getElementById('output');
+      var outText = outEl ? outEl.textContent : '';
+      if (outText && outText.indexOf('위 항목을') === -1 && outText.length > 10) {
+        rec = outText;
+      }
+    }
+    if (!rec) {
+      showToast('날짜, 프로젝트명, 제목을 입력하거나 먼저 회의록을 전송하세요');
+      return;
+    }
     buildSharePreview(rec);
   }
   panel.classList.toggle('open');
