@@ -324,6 +324,10 @@ textarea{resize:vertical;line-height:1.65}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 @media(max-width:500px){.grid{grid-template-columns:1fr}.field.full{grid-column:1}.action-bar{grid-template-columns:1fr}.att-detail-grid{grid-template-columns:1fr}.search-grid{grid-template-columns:1fr}.summary-stat-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* 기록 수정/삭제 액션바 애니메이션 */
+#recordActionBar { animation: slideDown 0.2s ease; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
 <body>
@@ -355,12 +359,12 @@ textarea{resize:vertical;line-height:1.65}
       </div>
       <div class="modal-field">
         <label>비밀번호 <span style="font-size:10px;color:var(--text-3)">(작성 시 입력한 4자리 또는 관리자 비밀번호)</span></label>
-        <input type="password" id="editPwInput" placeholder="작성 시 입력한 비밀번호" onkeydown="if(event.key==='Enter')checkEditPw()">
+        <input type="password" id="editPwInput" placeholder="작성 시 입력한 비밀번호" onkeydown="if(event.key==='Enter')checkEditPwNew()">
       </div>
       <div class="modal-err" id="editPwErr">작성자 또는 비밀번호가 올바르지 않습니다.</div>
       <div class="modal-btns">
         <button class="modal-btn ghost" onclick="closeEditModal()">취소</button>
-        <button class="modal-btn primary" onclick="checkEditPw()">확인</button>
+        <button class="modal-btn primary" onclick="checkEditPwNew()">확인</button>
       </div>
     </div>
     <div id="editContentStep" style="display:none">
@@ -1071,9 +1075,10 @@ function sheetsGetAll(){
   if(!cfg.sheetId||!cfg.refreshToken) return Promise.resolve([]);
   return sheetsReq('GET','/values/'+encodeURIComponent(SHEET_NAME+'!A:K'),null).then(function(data){
     if(!data||!data.values||data.values.length<=1) return [];
-    return data.values.slice(1).map(function(r){
+    return data.values.slice(1).map(function(r, i){
       return {docId:r[0]||'',date:r[1]||'',project:r[2]||'',title:r[3]||'',type:r[4]||'',direction:r[5]||'',
         author:r[6]||'',attendees:r[7]?r[7].split(','):[],memo:r[8]||'',driveLink:r[9]||'',ts:r[10]||'',
+        rowIndex:i+2, // 1-based + header row
         text:'['+r[1]+'] '+r[3]};
     });
   }).catch(function(){ return []; });
@@ -1341,7 +1346,7 @@ function resetAll(){
 
 // -- AI (Gemini) --------------------------------------------------------------
 function callGemini(prompt, maxTokens){
-  var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+cfg.geminiKey;
+  var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key='+cfg.geminiKey;
   return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens||1000}})
   }).then(function(r){return r.json();}).then(function(data){
@@ -1717,6 +1722,153 @@ function doSearch(){
   });
 }
 
+
+// ---- Sheets 수정 / 삭제 -------------------------------------------------------
+function sheetsUpdateRow(rowIndex, rowData) {
+  var range = SHEET_NAME + '!A' + rowIndex + ':K' + rowIndex;
+  return sheetsReq('PUT',
+    '/values/' + encodeURIComponent(range) + '?valueInputOption=RAW',
+    { values: [rowData] }
+  );
+}
+
+function sheetsDeleteRow(rowIndex) {
+  // Sheets에서 행 삭제 - 해당 행 clear 후 빈 행 제거
+  return sheetsReq('POST', ':batchUpdate', {
+    requests: [{
+      deleteDimension: {
+        range: {
+          sheetId: 0,
+          dimension: 'ROWS',
+          startIndex: rowIndex - 1,  // 0-based
+          endIndex: rowIndex         // exclusive
+        }
+      }
+    }]
+  });
+}
+
+function getSheetId() {
+  // 실제 sheetId (gid) 조회
+  return sheetsReq('GET', '?fields=sheets.properties', null).then(function(data) {
+    if (data && data.sheets) {
+      var sheet = data.sheets.find(function(s) { return s.properties.title === SHEET_NAME; });
+      return sheet ? sheet.properties.sheetId : 0;
+    }
+    return 0;
+  }).catch(function() { return 0; });
+}
+
+// 수정 모달 열기 (Sheets 기록 + 로컬 기록 통합)
+function openRecordEdit(r) {
+  currentEditRecord = r;
+  document.getElementById('editPwAuthor').value = '';
+  document.getElementById('editPwInput').value = '';
+  document.getElementById('editPwErr').style.display = 'none';
+  document.getElementById('editPwStep').style.display = 'block';
+  document.getElementById('editContentStep').style.display = 'none';
+  document.getElementById('editSub').textContent = '"' + (r.title||'') + '" - 본인 성함+직위와 비밀번호를 입력하세요.';
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('editPwAuthor').focus(); }, 100);
+}
+
+var currentEditRecord = null;
+
+function checkEditPwNew() {
+  var r = currentEditRecord;
+  if (!r) return;
+  var inputAuthor = document.getElementById('editPwAuthor').value.trim();
+  var inputPw = document.getElementById('editPwInput').value;
+  var validPw = r.authorPw || (cfg.editPw || 'sjs2026');
+  if (inputAuthor === r.author && inputPw === validPw) {
+    document.getElementById('editPwErr').style.display = 'none';
+    document.getElementById('editPwStep').style.display = 'none';
+    document.getElementById('editContentStep').style.display = 'block';
+    document.getElementById('editMemoInput').value = r.memo || '';
+    document.getElementById('editReason').value = '';
+  } else {
+    document.getElementById('editPwErr').style.display = 'block';
+    document.getElementById('editPwInput').value = '';
+  }
+}
+
+function saveRecordEdit() {
+  var r = currentEditRecord;
+  if (!r) return;
+  var newMemo = document.getElementById('editMemoInput').value.trim();
+  var reason = document.getElementById('editReason').value.trim();
+  r.memo = newMemo;
+  r.editedAt = new Date().toLocaleString('ko-KR');
+  r.editReason = reason;
+
+  var doSave = function() {
+    // 텔레그램 재발송
+    var updatedText = buildFullText(r) + (reason ? '\n\n[수정] ' + r.editedAt + (reason ? ' - ' + reason : '') : '');
+    if (cfg.botToken && cfg.chatId) {
+      sendTelegram('[수정된 회의록]\n' + updatedText).then(function() {
+        showToast('수정 저장 및 텔레그램 재발송 완료');
+      });
+    } else {
+      showToast('수정 저장 완료');
+    }
+    closeEditModal();
+    // 화면 갱신
+    if (document.getElementById('mainTab-search').classList.contains('active')) doSearch();
+    if (document.getElementById('mainTab-calendar').classList.contains('active')) loadSheetsAndRender('calendar');
+  };
+
+  // Sheets 기록이면 Sheets 업데이트
+  if (r.rowIndex && cfg.sheetId && cfg.refreshToken) {
+    getSheetId().then(function(gid) {
+      return sheetsUpdateRow(r.rowIndex, [
+        r.docId||'', r.date||'', r.project||'', r.title||'', r.type||'', r.direction||'',
+        r.author||'', (Array.isArray(r.attendees)?r.attendees.join(','):r.attendees||''),
+        newMemo, r.driveLink||'', r.ts||''
+      ]);
+    }).then(function() {
+      addLog('ok', 'Sheets 수정 완료');
+      // sheetsDocHistory 갱신
+      if (sheetsDocHistory) {
+        var idx = sheetsDocHistory.findIndex(function(s) { return s.docId === r.docId; });
+        if (idx !== -1) sheetsDocHistory[idx].memo = newMemo;
+      }
+      doSave();
+    }).catch(function(e) {
+      addLog('err', 'Sheets 수정 실패: ' + e.message);
+      doSave();
+    });
+  } else {
+    doSave();
+  }
+}
+
+function deleteRecord(r) {
+  if (!confirm('"' + (r.title||'') + '" 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
+  var doDelete = function() {
+    // sheetsDocHistory에서 제거
+    if (sheetsDocHistory) {
+      sheetsDocHistory = sheetsDocHistory.filter(function(s) { return s.docId !== r.docId; });
+    }
+    showToast('삭제됐습니다');
+    if (document.getElementById('mainTab-search').classList.contains('active')) doSearch();
+    if (document.getElementById('mainTab-calendar').classList.contains('active')) loadSheetsAndRender('calendar');
+  };
+
+  if (r.rowIndex && cfg.sheetId && cfg.refreshToken) {
+    getSheetId().then(function(gid) {
+      return sheetsDeleteRow(r.rowIndex);
+    }).then(function() {
+      addLog('ok', 'Sheets 삭제 완료');
+      doDelete();
+    }).catch(function(e) {
+      addLog('err', 'Sheets 삭제 실패: ' + e.message);
+      doDelete();
+    });
+  } else {
+    doDelete();
+  }
+}
+
 // ---- 기록 상세 보기 ----------------------------------------------------------
 function buildFullText(r) {
   if (r.text && r.text.length > 100) return r.text;
@@ -1750,7 +1902,49 @@ function showRecordDetail(r) {
   out.textContent = fullText;
   switchMainTab('write');
   navigator.clipboard.writeText(fullText).catch(function(){});
+  // 수정/삭제 버튼 배너 표시
+  showRecordActionBar(r);
   showToast((r.title||'기록') + ' 내용을 불러왔습니다');
+}
+
+function showRecordActionBar(r) {
+  var existing = document.getElementById('recordActionBar');
+  if (existing) existing.remove();
+  var bar = document.createElement('div');
+  bar.id = 'recordActionBar';
+  bar.style.cssText = 'display:flex;gap:8px;margin-top:10px;padding:10px 14px;background:#EEF5FE;border:0.5px solid #b8d4f5;border-radius:10px;align-items:center;flex-wrap:wrap';
+  bar.innerHTML = '<span style="font-size:12px;color:#185FA5;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">&#128065; <strong>' + (r.title||'') + '</strong> (' + (r.date||'') + ')</span>';
+  var editBtn = document.createElement('button');
+  editBtn.className = 'add-btn';
+  editBtn.style.cssText = 'font-size:12px;color:#185FA5;border-color:#b8d4f5';
+  editBtn.textContent = '✏ 수정';
+  editBtn.onclick = function() { openRecordEdit(r); };
+  var delBtn = document.createElement('button');
+  delBtn.className = 'add-btn';
+  delBtn.style.cssText = 'font-size:12px;color:var(--red);border-color:#f09595';
+  delBtn.textContent = '🗑 삭제';
+  delBtn.onclick = function() {
+    // 삭제 전 비밀번호 확인
+    var pw = prompt('삭제하려면 비밀번호를 입력하세요 (작성자 4자리 또는 관리자 비밀번호)');
+    if (pw === null) return;
+    var validPw = r.authorPw || (cfg.editPw||'sjs2026');
+    var validAdmin = cfg.adminPw || '';
+    if (pw === validPw || (validAdmin && pw === validAdmin)) {
+      deleteRecord(r);
+      bar.remove();
+    } else {
+      showToast('비밀번호가 올바르지 않습니다');
+    }
+  };
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'add-btn';
+  closeBtn.style.fontSize = '12px';
+  closeBtn.textContent = '✕ 닫기';
+  closeBtn.onclick = function() { bar.remove(); };
+  bar.appendChild(editBtn); bar.appendChild(delBtn); bar.appendChild(closeBtn);
+  // output 카드의 action-bar 위에 삽입
+  var actionBar = document.querySelector('.action-bar');
+  if (actionBar) actionBar.parentNode.insertBefore(bar, actionBar);
 }
 
 // -- 토스트 -------------------------------------------------------------------
