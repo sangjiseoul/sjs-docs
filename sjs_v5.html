@@ -787,7 +787,25 @@ function init() {
 
 // -- 설정 --------------------------------------------------------------------
 function loadCfg() {
+  // 현재 버전 로드
   try { var s=localStorage.getItem('sjs_cfg_v6'); if(s) cfg=Object.assign(cfg,JSON.parse(s)); } catch(e){}
+  // 이전 버전에서 refreshToken 마이그레이션 (sjs_cfg_v4, sjs_cfg_v4b)
+  if (!cfg.refreshToken) {
+    ['sjs_cfg_v4','sjs_cfg_v4b','sjs_cfg_v5'].forEach(function(oldKey) {
+      try {
+        var old = localStorage.getItem(oldKey);
+        if (old) {
+          var oldCfg = JSON.parse(old);
+          if (oldCfg.refreshToken && !cfg.refreshToken) {
+            cfg.refreshToken = oldCfg.refreshToken;
+            cfg.accessToken  = oldCfg.accessToken  || '';
+            cfg.tokenExpiry  = oldCfg.tokenExpiry  || 0;
+            saveCfg();
+          }
+        }
+      } catch(e) {}
+    });
+  }
   var params = new URLSearchParams(window.location.search);
   var map = {cid:'clientId',cs:'clientSecret',fid:'folderId',bt:'botToken',ci:'chatId',pw:'adminPw',gk:'geminiKey',sid:'sheetId'};
   var changed = false;
@@ -845,7 +863,9 @@ function updateBanner(){
 function updateEasyAuthBanner(){
   var banner=document.getElementById('easyAuthBanner');
   var hasCommon=!!(cfg.clientId&&cfg.clientSecret&&cfg.folderId&&cfg.botToken&&cfg.chatId);
-  banner.classList.toggle('show', hasCommon&&!cfg.refreshToken);
+  // refreshToken 없거나 tokenExpiry가 너무 오래됐을 때만 배너 표시
+  var needsAuth = !cfg.refreshToken;
+  banner.classList.toggle('show', hasCommon&&needsAuth);
 }
 
 function toggleSetup(){
@@ -935,12 +955,27 @@ function checkOAuthCallback(){
 function getAccessToken(){
   if(!cfg.refreshToken) return Promise.resolve(null);
   if(cfg.accessToken&&Date.now()<cfg.tokenExpiry) return Promise.resolve(cfg.accessToken);
+  // Access Token 만료 - Refresh Token으로 자동 갱신
   return fetch(TOKEN_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
     body:new URLSearchParams({client_id:cfg.clientId,client_secret:cfg.clientSecret,refresh_token:cfg.refreshToken,grant_type:'refresh_token'})
   }).then(function(r){return r.json();}).then(function(data){
-    if(data.access_token){ cfg.accessToken=data.access_token; cfg.tokenExpiry=Date.now()+(data.expires_in-60)*1000; saveCfg(); return cfg.accessToken; }
+    if(data.access_token){
+      cfg.accessToken=data.access_token;
+      cfg.tokenExpiry=Date.now()+(data.expires_in-60)*1000;
+      saveCfg();
+      return cfg.accessToken;
+    }
+    // refresh_token 자체가 만료된 경우 (invalid_grant) - 재인증 필요
+    if(data.error==='invalid_grant'){
+      cfg.refreshToken=''; cfg.accessToken=''; cfg.tokenExpiry=0;
+      saveCfg(); updateBadges(); updateBanner(); updateEasyAuthBanner();
+      addLog('warn','Google 인증이 만료됐습니다. 재인증이 필요합니다.');
+    }
     return null;
-  }).catch(function(){ return null; });
+  }).catch(function(e){
+    addLog('warn','Token 갱신 중 네트워크 오류: '+e.message);
+    return null;
+  });
 }
 
 function revokeGoogle(){
