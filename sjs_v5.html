@@ -1346,7 +1346,7 @@ function resetAll(){
 
 // -- AI (Gemini) --------------------------------------------------------------
 function callGemini(prompt, maxTokens){
-  var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key='+cfg.geminiKey;
+  var url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key='+cfg.geminiKey;
   return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens||1000}})
   }).then(function(r){return r.json();}).then(function(data){
